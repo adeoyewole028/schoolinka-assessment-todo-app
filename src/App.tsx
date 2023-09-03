@@ -7,7 +7,7 @@ import SingleCalender from "./components/SingleCalender";
 import TaskLists from "./components/TaskLists";
 import useTodoStore from "../src/store/useStore";
 import CreateTodo from "./components/modals/CreateTodo";
-import OptionsModal from "./components/modals/OptionsModal";
+import OptionsModal from "./components/modals/DeleteOrEditModal";
 import FullCalendar from "./components/FullCalender";
 
 function App() {

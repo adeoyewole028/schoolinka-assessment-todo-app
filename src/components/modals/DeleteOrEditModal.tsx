@@ -22,16 +22,16 @@ export default function OptionsModal() {
         <GrClose />
       </button>
       <div className="flex flex-col ">
-        <h3 className="mb-5 font-semibold">Title</h3>
+        <h3 className="mb-5 font-semibold capitalize">{singleTodo.title}</h3>
         <div className="flex flex-col gap-2">
           <p className="flex items-center gap-1">
-            <span className="inline-flex">
+            <span className="inline-flex text-[#3F5BF6]">
               <LuCalendar />
             </span>
             20th January, 2023
           </p>
           <p className="flex items-center gap-1">
-            <span className="inline-flex">
+            <span className="inline-flex text-[#3F5BF6]">
               <BiTimeFive />
             </span>
             8:00 - 10:00 AM
@@ -47,7 +47,7 @@ export default function OptionsModal() {
               Delete
             </Button>
             <Button
-              disabled={singleTodo.completed} 
+              disabled={singleTodo.completed}
               onClick={() => openEditTodo(true)}
               className={`bg-[#3F5BF6] text-white px-[1em] lg:px-[3.5em] py-1 border rounded-md font-medium ${
                 singleTodo.completed ? "opacity-50 cursor-not-allowed" : ""

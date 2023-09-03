@@ -3,7 +3,6 @@ import { useState, useCallback } from "react";
 import { GrClose } from "react-icons/gr";
 import { Button } from "@nextui-org/react";
 
-
 const CreateTodo: React.FC<{
   header: string;
 }> = ({ header }) => {
@@ -15,7 +14,6 @@ const CreateTodo: React.FC<{
     editTodo?.title || ""
   );
   const [createTodo, setCreateTodo] = useState<string>("");
-
 
   const handleCreateTodo = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCreateTodo(e.target.value);
@@ -52,6 +50,7 @@ const CreateTodo: React.FC<{
         </button>
       </div>
       {editTodo && header === "Edit Task" ? (
+        // Edit todo
         <form className="flex flex-col">
           <div className="flex flex-col gap-2">
             <div className="w-full">
@@ -65,38 +64,38 @@ const CreateTodo: React.FC<{
                 onChange={handleChange}
               ></textarea>
             </div>
-            <div className="flex justify-between">
-              <div>
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
+              <div className="col-span-5 lg:col-span-1">
                 <label htmlFor="date" className="sr-only">
                   Date
                 </label>
                 <input
-                  className="border ring-1 ring-gray-300 w-[5em] rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50"
+                  className="border ring-1 ring-gray-300 w-full lg:w-[7em] rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
                   type="date"
                   name="date"
                   id="date"
                 />
               </div>
-
-              <div>
-                <div className="flex gap-3">
-                  <div>
+              <div className="-z-50"></div>
+              <div className="col-span-5 lg:col-span-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="">
                     <label htmlFor="time" className="sr-only">
                       Time
                     </label>
                     <input
-                      className="border ring-1 ring-gray-300 w-[5.5em] rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50"
+                      className="border ring-1 ring-gray-300 rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 w-full text-sm"
                       type="time"
                       name="time"
                       id="time"
                     />
                   </div>
-                  <div>
+                  <div className="">
                     <label htmlFor="time" className="sr-only">
                       Time
                     </label>
                     <input
-                      className="border ring-1 ring-gray-300 w-[5.5em] rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50"
+                      className="border ring-1 ring-gray-300 rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 w-full text-sm"
                       type="time"
                       name="time"
                       id="time"
@@ -113,17 +112,17 @@ const CreateTodo: React.FC<{
             </p>
           </div>
 
-          <div className="flex self-center mt-8">
-            <div className="flex gap-3">
+          <div className="mt-8">
+            <div className="grid grid-cols-2 gap-3 w-full">
               <Button
                 onClick={() => openModal(false)}
-                className="px-12 py-1.5 border rounded-md bg-white font-medium"
+                className="border rounded-md bg-white font-medium w-full"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleSaveTodo}
-                className="bg-[#3F5BF6] text-white px-12 py-1 border rounded-md font-medium"
+                className="bg-[#3F5BF6] text-white border rounded-md font-medium w-full"
               >
                 Save
               </Button>
@@ -131,6 +130,7 @@ const CreateTodo: React.FC<{
           </div>
         </form>
       ) : (
+        // Create todo
         <form className="flex flex-col ">
           <div className="flex flex-col gap-2">
             <div className="w-full">
@@ -144,26 +144,27 @@ const CreateTodo: React.FC<{
                 onChange={handleCreateTodo}
               ></textarea>
             </div>
-            <div className="flex justify-between">
-              <div>
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
+              <div className="col-span-5 lg:col-span-1">
                 <label htmlFor="date" className="sr-only">
                   Date
                 </label>
                 <input
-                  className="border ring-1 ring-gray-300 w-[5em] rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50"
+                  className="border ring-1 ring-gray-300 w-full lg:w-[7em] rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
                   type="date"
                   name="date"
                   id="date"
                 />
               </div>
-              <div>
-                <div className="flex gap-3">
+              <div className="-z-50"></div>
+              <div className="col-span-5 lg:col-span-3">
+                <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label htmlFor="time" className="sr-only">
                       Time
                     </label>
                     <input
-                      className="border ring-1 ring-gray-300 w-[5.5em] rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50"
+                      className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
                       type="time"
                       name="time"
                       id="time"
@@ -174,7 +175,7 @@ const CreateTodo: React.FC<{
                       Time
                     </label>
                     <input
-                      className="border ring-1 ring-gray-300 w-[5.5em] rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50"
+                      className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
                       type="time"
                       name="time"
                       id="time"
@@ -191,17 +192,17 @@ const CreateTodo: React.FC<{
             </p>
           </div>
 
-          <div className="flex self-center mt-8">
-            <div className="flex gap-3">
+          <div className="mt-8">
+            <div className="grid grid-cols-2 gap-3 w-full">
               <Button
                 onClick={() => openModal(false)}
-                className="px-12 py-1.5 border rounded-md bg-white font-medium"
+                className="border rounded-md bg-white font-medium"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleAddTodo}
-                className="bg-[#3F5BF6] text-white px-12 py-1 border rounded-md font-medium"
+                className="bg-[#3F5BF6] text-white border rounded-md font-medium"
               >
                 Add
               </Button>
