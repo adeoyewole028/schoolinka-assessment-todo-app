@@ -11,14 +11,14 @@ import OptionsModal from "./components/modals/OptionsModal";
 import FullCalendar from "./components/FullCalender";
 
 function App() {
-  const getTodo = useTodoStore((state) => state.getPagination);
+  const getPaginatedTodo = useTodoStore((state) => state.getPagination);
   const openModal = useTodoStore((state) => state.isModal);
   const openCreateTodo = useTodoStore((state) => state.isCreateTodo);
   console.log(openCreateTodo);
   const openEditTodo = useTodoStore((state) => state.isEditTodo);
   useEffect(() => {
-    getTodo();
-  }, [getTodo]);
+    getPaginatedTodo();
+  }, [getPaginatedTodo]);
   return (
     <div className="mx-auto max-w-7xl pb-10">
       <Nav />

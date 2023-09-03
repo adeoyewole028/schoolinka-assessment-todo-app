@@ -100,6 +100,7 @@ const useTodoStore = create<TodoStore>()(
             );
 
             const data = await res.json();
+            console.log(data);
             if (data) {
               set({ todo: data });
             }
@@ -121,29 +122,20 @@ const useTodoStore = create<TodoStore>()(
                 body: JSON.stringify({
                   title: todo.title,
                   completed: todo.completed,
-                  userId: todo.userId, // Fix the property name here
+                  userId: todo.userId,
                 }),
                 headers: {
                   "Content-Type": "application/json",
                 },
               }
             );
-            console.log(res.status);
             if (res.status !== 201) {
               throw new Error("Failed to create todo");
             } else {
               const data = await res.json();
               console.log(data, " new data");
 
-              // Update the paginatedTodo state immediately with the new todo
               const newTodo = get().paginatedTodo;
-              //   newTodo.unshift(data);
-              console.log(newTodo, "new todo");
-              //   if (data.id === 201) {
-              //     console.log("201 error");
-              //   } else {
-              //     set({ paginatedTodo: [data, ...newTodo] });
-              //   }
               set({ paginatedTodo: [data, ...newTodo] });
             }
           } catch (err) {
@@ -222,14 +214,16 @@ const useTodoStore = create<TodoStore>()(
         setCurrentPage: (page: number) => {
           set({ currentPage: page });
         },
-        getPagination: () => {
-          const { todo, currentPage, itemsPerPage, getTodo } = get();
-          getTodo();
+        getPagination: async () => {
+          const { currentPage, itemsPerPage, getTodo } = get();
+          await getTodo();
+
+          const { todo } = get();
           const indexOfLastItem = currentPage * itemsPerPage;
           const indexOfFirstItem = indexOfLastItem - itemsPerPage;
           const currentItems = todo.slice(indexOfFirstItem, indexOfLastItem);
           const totalPage = Math.ceil(todo.length / itemsPerPage);
-          console.log(currentItems);
+
           set({ totalPages: totalPage, paginatedTodo: currentItems });
         },
       }),
