@@ -9,7 +9,6 @@ const BottomDrawer: React.FC<{
   handleHide: (state: boolean) => void;
   hide: boolean;
   addToast: (
-    id: string,
     message: string,
     type: string,
     icon: string,
@@ -41,7 +40,6 @@ const BottomDrawer: React.FC<{
     console.log(singleTodo.id);
     deleteTodo(singleTodo.id);
     addToast(
-      "toast-danger",
       "Task has been deleted.",
       "success",
       "check-icon",
@@ -59,7 +57,6 @@ const BottomDrawer: React.FC<{
     updateTodo(editTodo.id, textareaValue, editTodo.completed);
     // setTextareaValue(textareaValue);
     addToast(
-      "toast-updated",
       "Task Updated successfully.",
       "success",
       "check-icon",

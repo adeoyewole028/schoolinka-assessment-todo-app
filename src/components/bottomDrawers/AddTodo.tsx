@@ -7,7 +7,6 @@ const BottomDrawer: React.FC<{
   handleHide: (state: boolean) => void;
   hide: boolean;
   addToast: (
-    id: string,
     message: string,
     type: string,
     icon: string,
@@ -32,7 +31,6 @@ const BottomDrawer: React.FC<{
         userId: Math.floor(Math.random() * 1000),
       });
       addToast(
-        "toast-success",
         "Task Added successfully.",
         "success",
         "check-icon",

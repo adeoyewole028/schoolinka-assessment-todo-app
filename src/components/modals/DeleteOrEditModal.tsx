@@ -6,7 +6,6 @@ import { Button } from "@nextui-org/react";
 
 const OptionsModal: React.FC<{
   addToast: (
-    id: string,
     message: string,
     type: string,
     icon: string,
@@ -20,10 +19,8 @@ const OptionsModal: React.FC<{
   const deleteTodo = useTodoStore((state) => state.deleteTodo);
 
   const handleDeleteTodo = () => {
-    console.log(singleTodo.id);
     deleteTodo(singleTodo.id);
     addToast(
-      "toast-danger",
       "Task has been deleted.",
       "success",
       "check-icon",

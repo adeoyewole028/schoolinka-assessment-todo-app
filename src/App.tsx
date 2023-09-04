@@ -46,14 +46,13 @@ function App() {
   >([]);
 
   const addToast = (
-    id: string,
     message: string,
     type: string,
     icon: string,
     fill: string,
     background: string
   ) => {
-    // const id = Date.now().toString(); // Generate a unique ID for the toast
+    const id = Date.now().toString(); // Generate a unique ID for the toast
     const newToast = {
       id,
       message,

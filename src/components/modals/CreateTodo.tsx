@@ -1,5 +1,5 @@
 import useTodoStore from "../../store/useStore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GrClose } from "react-icons/gr";
 import { Button } from "@nextui-org/react";
 import Loading from "../Loading";
@@ -7,7 +7,6 @@ import Loading from "../Loading";
 const CreateTodo: React.FC<{
   header: string;
   addToast: (
-    id: string,
     message: string,
     type: string,
     icon: string,
@@ -24,10 +23,19 @@ const CreateTodo: React.FC<{
     editTodo?.title || ""
   );
   const [createTodo, setCreateTodo] = useState<string>("");
+  const [toastTimeout, setToastTimeout] = useState<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    return () => {
+      if (toastTimeout) {
+        clearTimeout(toastTimeout);
+      }
+    };
+  }, [toastTimeout]);
 
   const handleCreateTodo = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCreateTodo(e.target.value);
   };
+
   const handleAddTodo = () => {
     if (createTodo === "") {
       return;
@@ -37,39 +45,50 @@ const CreateTodo: React.FC<{
         completed: false,
         userId: Math.floor(Math.random() * 1000),
       });
-      // Add a success toast when a todo is added
-      addToast(
-        "toast-success",
-        "Task Added successfully.",
-        "success",
-        "check-icon",
-        "green",
-        "bg-green-100"
-      );
+
+      if (toastTimeout) {
+        clearTimeout(toastTimeout);
+      }
+
+      const newTimeout = setTimeout(() => {
+        addToast(
+          "Task Added successfully.",
+          "success",
+          "check-icon",
+          "green",
+          "bg-green-100"
+        );
+      }, 2000);
+
+      setToastTimeout(newTimeout);
 
       setCreateTodo("");
     }
   };
 
-  if (header === "Edit Task") {
-    console.log(editTodo);
-  }
-
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTextareaValue(e.target.value);
   };
 
-  const handleSaveTodo = () => {
+  const handleUpdateTodo = () => {
+    console.log(isLoading, "task");
     updateTodo(editTodo.id, textareaValue, editTodo.completed);
-    // Add a success toast when a todo is updated
-    addToast(
-      "toast-updated",
-      "Task Updated successfully.",
-      "success",
-      "check-icon",
-      "green",
-      "bg-green-100"
-    );
+
+    if (toastTimeout) {
+      clearTimeout(toastTimeout);
+    }
+
+    const newTimeout = setTimeout(() => {
+      addToast(
+        "Task Updated successfully.",
+        "success",
+        "check-icon",
+        "green",
+        "bg-green-100"
+      );
+    }, 2000);
+
+    setToastTimeout(newTimeout);
   };
 
   return (
@@ -152,7 +171,7 @@ const CreateTodo: React.FC<{
                 Cancel
               </Button>
               <Button
-                onClick={handleSaveTodo}
+                onClick={handleUpdateTodo}
                 className={`bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium w-full ${
                   isLoading ? "opacity-50 cursor-not-allowed" : ""
                 }`}

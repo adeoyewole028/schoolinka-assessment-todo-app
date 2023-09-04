@@ -61,7 +61,7 @@ const useTodoStore = create<TodoStore>()(
           title: "",
           completed: false,
         },
-        loading: false,
+        loading: true,
         isCreateTodo: false,
         isEditTodo: false,
         setEditTodo: (isEditTodo: boolean) => {
@@ -84,7 +84,6 @@ const useTodoStore = create<TodoStore>()(
             completed: boolean;
           }
         ) => {
-          //   console.log(singleTodo);
           set({ singleTodo: singleTodo });
           set({ isModal: isModal });
           set({ isCreateTodo: false });
@@ -140,10 +139,21 @@ const useTodoStore = create<TodoStore>()(
               throw new Error("Failed to create todo");
             } else {
               const data = await res.json();
-              console.log(data, " new data");
+              console.log(data, "new data");
 
-              const newTodo = get().paginatedTodo;
-              set({ paginatedTodo: [data, ...newTodo] });
+              // Add the new task to the beginning of the todo array
+              set((state) => ({ todo: [data, ...state.todo] }));
+
+              // Update paginatedTodo based on the current page
+              const { currentPage, itemsPerPage, todo } = get();
+              const indexOfLastItem = currentPage * itemsPerPage;
+              const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+              const currentItems = todo.slice(
+                indexOfFirstItem,
+                indexOfLastItem
+              );
+              set({ paginatedTodo: currentItems });
+
               set({ loading: false });
             }
           } catch (err) {
@@ -153,7 +163,6 @@ const useTodoStore = create<TodoStore>()(
         },
 
         deleteTodo: async (id: number) => {
-          console.log(id);
           try {
             set({ loading: true });
             const res = await fetch(
@@ -169,11 +178,18 @@ const useTodoStore = create<TodoStore>()(
             if (res.status !== 200) {
               throw new Error("Failed to delete todo");
             } else {
-              // filter the deleted todo
-              const newTodo = get().paginatedTodo.filter(
-                (todo) => todo.id !== id
+              const newTodo = get().todo.filter((todo) => todo.id !== id);
+              set({ todo: newTodo });
+
+              const { currentPage, itemsPerPage, todo } = get();
+              const indexOfLastItem = currentPage * itemsPerPage;
+              const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+              const currentItems = todo.slice(
+                indexOfFirstItem,
+                indexOfLastItem
               );
-              set({ paginatedTodo: newTodo });
+              set({ paginatedTodo: currentItems });
+
               set({ loading: false });
             }
           } catch (err) {
@@ -181,6 +197,7 @@ const useTodoStore = create<TodoStore>()(
             set({ loading: false });
           }
         },
+
         taskLoading: {},
         // update todo
         updateTodo: async (id: number, title: string, completed: boolean) => {
@@ -206,6 +223,8 @@ const useTodoStore = create<TodoStore>()(
 
             const data = await res.json();
             console.log(data, "new update");
+            set({ loading: false });
+            console.log(get().loading);
             // update paginated data
             const newTodo = get().paginatedTodo.map((todo) => {
               if (todo.id === id) {
@@ -218,7 +237,6 @@ const useTodoStore = create<TodoStore>()(
               return todo;
             });
             set({ paginatedTodo: newTodo });
-            set({ loading: false });
             set((state) => ({
               taskLoading: { ...state.taskLoading, [id]: false },
             }));
@@ -234,17 +252,27 @@ const useTodoStore = create<TodoStore>()(
         setCurrentPage: (page: number) => {
           set({ currentPage: page });
         },
+
         getPagination: async () => {
           const { currentPage, itemsPerPage, getTodo } = get();
           await getTodo();
 
-          const { todo } = get();
+          // Sort the todo array by id in descending order (newest first)
+          const sortedTodo = get().todo.sort((a, b) => b.id - a.id);
+
           const indexOfLastItem = currentPage * itemsPerPage;
           const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-          const currentItems = todo.slice(indexOfFirstItem, indexOfLastItem);
-          const totalPage = Math.ceil(todo.length / itemsPerPage);
+          const currentItems = sortedTodo.slice(
+            indexOfFirstItem,
+            indexOfLastItem
+          );
 
-          set({ totalPages: totalPage, paginatedTodo: currentItems });
+          const totalPage = Math.ceil(sortedTodo.length / itemsPerPage);
+
+          set({
+            totalPages: totalPage,
+            paginatedTodo: currentItems,
+          });
         },
       }),
       {
