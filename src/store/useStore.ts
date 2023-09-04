@@ -5,6 +5,7 @@ import { Todo } from "../typings/model";
 type TodoStore = {
   todo: Todo[];
   getTodo: () => void;
+  loading: boolean;
   paginatedTodo: Todo[];
   getPagination: () => void;
   currentPage: number;
@@ -39,6 +40,9 @@ type TodoStore = {
   isEditTodo: boolean;
   updateTodo: (id: number, title: string, completed: boolean) => void;
   setEditTodo: (isEditTodo: boolean) => void;
+  taskLoading: {
+    [key: number]: boolean;
+  };
 };
 const useTodoStore = create<TodoStore>()(
   devtools(
@@ -57,7 +61,7 @@ const useTodoStore = create<TodoStore>()(
           title: "",
           completed: false,
         },
-
+        loading: false,
         isCreateTodo: false,
         isEditTodo: false,
         setEditTodo: (isEditTodo: boolean) => {
@@ -80,7 +84,7 @@ const useTodoStore = create<TodoStore>()(
             completed: boolean;
           }
         ) => {
-        //   console.log(singleTodo);
+          //   console.log(singleTodo);
           set({ singleTodo: singleTodo });
           set({ isModal: isModal });
           set({ isCreateTodo: false });
@@ -89,6 +93,7 @@ const useTodoStore = create<TodoStore>()(
 
         getTodo: async () => {
           try {
+            set({ loading: true });
             const res = await fetch(
               "https://jsonplaceholder.typicode.com/todos",
               {
@@ -102,9 +107,11 @@ const useTodoStore = create<TodoStore>()(
             const data = await res.json();
             if (data) {
               set({ todo: data });
+              set({ loading: false });
             }
           } catch (err) {
             console.log(err);
+            set({ loading: false });
           }
         },
 
@@ -114,6 +121,7 @@ const useTodoStore = create<TodoStore>()(
           userId: number;
         }) => {
           try {
+            set({ loading: true });
             const res = await fetch(
               "https://jsonplaceholder.typicode.com/todos",
               {
@@ -136,15 +144,18 @@ const useTodoStore = create<TodoStore>()(
 
               const newTodo = get().paginatedTodo;
               set({ paginatedTodo: [data, ...newTodo] });
+              set({ loading: false });
             }
           } catch (err) {
             console.log(err);
+            set({ loading: false });
           }
         },
 
         deleteTodo: async (id: number) => {
           console.log(id);
           try {
+            set({ loading: true });
             const res = await fetch(
               `https://jsonplaceholder.typicode.com/todos/${id}`,
               {
@@ -162,19 +173,23 @@ const useTodoStore = create<TodoStore>()(
               const newTodo = get().paginatedTodo.filter(
                 (todo) => todo.id !== id
               );
-              console.log(newTodo);
               set({ paginatedTodo: newTodo });
+              set({ loading: false });
             }
-
-            console.log(res);
           } catch (err) {
             console.log(err);
+            set({ loading: false });
           }
         },
-
+        taskLoading: {},
         // update todo
         updateTodo: async (id: number, title: string, completed: boolean) => {
           try {
+            set({ loading: true });
+            set((state) => ({
+              taskLoading: { ...state.taskLoading, [id]: true },
+            }));
+
             const res = await fetch(
               `https://jsonplaceholder.typicode.com/posts/${id}`,
               {
@@ -203,10 +218,16 @@ const useTodoStore = create<TodoStore>()(
               return todo;
             });
             set({ paginatedTodo: newTodo });
-
-            console.log(newTodo);
+            set({ loading: false });
+            set((state) => ({
+              taskLoading: { ...state.taskLoading, [id]: false },
+            }));
           } catch (err) {
             console.log(err);
+            set({ loading: false });
+            set((state) => ({
+              taskLoading: { ...state.taskLoading, [id]: false },
+            }));
           }
         },
 

@@ -4,7 +4,16 @@ import { LuCalendar } from "react-icons/lu";
 import { BiTimeFive } from "react-icons/bi";
 import { Button } from "@nextui-org/react";
 
-export default function OptionsModal() {
+const OptionsModal: React.FC<{
+  addToast: (
+    id: string,
+    message: string,
+    type: string,
+    icon: string,
+    fill: string,
+    background: string
+  ) => void;
+}> = ({ addToast }) => {
   const openModal = useTodoStore((state) => state.setIsModal);
   const openEditTodo = useTodoStore((state) => state.setEditTodo);
   const singleTodo = useTodoStore((state) => state.singleTodo);
@@ -13,6 +22,14 @@ export default function OptionsModal() {
   const handleDeleteTodo = () => {
     console.log(singleTodo.id);
     deleteTodo(singleTodo.id);
+    addToast(
+      "toast-danger",
+      "Task has been deleted.",
+      "success",
+      "check-icon",
+      "red",
+      "bg-red-100"
+    );
     openModal(false);
   };
 
@@ -60,4 +77,6 @@ export default function OptionsModal() {
       </div>
     </div>
   );
-}
+};
+
+export default OptionsModal;

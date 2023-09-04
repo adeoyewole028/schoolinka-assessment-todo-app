@@ -1,12 +1,14 @@
 import React from "react";
 import useTodoStore from "../store/useStore";
 import Pagination from "../components/Pagination";
+import Loading from "./Loading";
 
 const TaskLists: React.FC<{
   handleHide: (state: boolean, item: {}) => void;
   hide: boolean;
 }> = ({ handleHide, hide }) => {
   const todo = useTodoStore((state) => state.paginatedTodo);
+  const taskLoading = useTodoStore((state) => state.taskLoading);
   const openModal = useTodoStore((state) => state.setIsModal);
   const updateTodo = useTodoStore((state) => state.updateTodo);
 
@@ -27,14 +29,14 @@ const TaskLists: React.FC<{
       openModal(true, item);
       handleHide(true, item);
     } else {
-      try {
-        const updatedTodo = { ...item, completed: !item.completed };
-        updateTodo(item.id, updatedTodo.title, updatedTodo.completed);
-        openModal(false, item);
-        // console.log("is updated");
-      } catch (error) {
-        console.log(error);
-      }
+      // Set loading state for the specific task
+      useTodoStore.setState({
+        taskLoading: { ...taskLoading, [item.id]: true },
+      });
+      const updatedTodo = { ...item, completed: !item.completed };
+      updateTodo(item.id, updatedTodo.title, updatedTodo.completed);
+      openModal(false, item);
+      // console.log("is updated");
     }
   };
 
@@ -54,12 +56,18 @@ const TaskLists: React.FC<{
                 item.completed ? "line-through text-gray-400" : ""
               }`}
             >
-              <input
-                onChange={(e) => handleCompleteCheck(e, item)}
-                className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                type="checkbox"
-                checked={item.completed}
-              />
+              {/* Conditionally render loading indicator based on loading state */}
+              {taskLoading[item.id] ? (
+                <Loading />
+              ) : (
+                <input
+                  onChange={(e) => handleCompleteCheck(e, item)}
+                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                  type="checkbox"
+                  checked={item.completed}
+                />
+              )}
+
               <div className="flex flex-col">
                 <label>{item.title}</label>
                 <span>date and time</span>

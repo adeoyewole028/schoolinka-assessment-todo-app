@@ -8,12 +8,20 @@ import useTodoStore from "../../store/useStore";
 const BottomDrawer: React.FC<{
   handleHide: (state: boolean) => void;
   hide: boolean;
-}> = ({ handleHide, hide }) => {
+  addToast: (
+    id: string,
+    message: string,
+    type: string,
+    icon: string,
+    fill: string,
+    background: string
+  ) => void;
+}> = ({ handleHide, hide, addToast }) => {
   const updateTodo = useTodoStore((state) => state.updateTodo);
   const singleTodo = useTodoStore((state) => state.singleTodo);
   const editTodo = useTodoStore((state) => state.singleTodo);
   const [textareaValue, setTextareaValue] = useState<string>(
-    editTodo.title || ""
+    editTodo?.title || ""
   );
   const deleteTodo = useTodoStore((state) => state.deleteTodo);
   const [isEditTodo, setIsEditTodo] = useState<boolean>(false);
@@ -32,6 +40,14 @@ const BottomDrawer: React.FC<{
   const handleDeleteTodo = () => {
     console.log(singleTodo.id);
     deleteTodo(singleTodo.id);
+    addToast(
+      "toast-danger",
+      "Task has been deleted.",
+      "success",
+      "check-icon",
+      "red",
+      "bg-red-100"
+    );
     handleHide(false);
   };
 
@@ -42,6 +58,14 @@ const BottomDrawer: React.FC<{
   const handleSaveTodo = () => {
     updateTodo(editTodo.id, textareaValue, editTodo.completed);
     // setTextareaValue(textareaValue);
+    addToast(
+      "toast-updated",
+      "Task Updated successfully.",
+      "success",
+      "check-icon",
+      "green",
+      "bg-green-100"
+    );
     handleHide(false);
   };
 
@@ -96,7 +120,7 @@ const BottomDrawer: React.FC<{
         {editOrDelete && (
           <div className="flex flex-col ">
             <h3 className="mb-5 font-semibold capitalize">
-              {singleTodo.title}
+              {singleTodo?.title}
             </h3>
             <div className="flex flex-col gap-2">
               <p className="flex items-center gap-1">
@@ -122,10 +146,10 @@ const BottomDrawer: React.FC<{
                   Delete
                 </Button>
                 <Button
-                  disabled={singleTodo.completed}
+                  disabled={singleTodo?.completed}
                   onClick={() => openEditTodo(true)}
                   className={`bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium ${
-                    singleTodo.completed ? "opacity-50 cursor-not-allowed" : ""
+                    singleTodo?.completed ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                 >
                   Edit

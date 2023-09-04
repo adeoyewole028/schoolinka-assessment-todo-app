@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { Button } from "@nextui-org/react";
 import { GrClose } from "react-icons/gr";
 import useTodoStore from "../../store/useStore";
@@ -6,7 +6,15 @@ import useTodoStore from "../../store/useStore";
 const BottomDrawer: React.FC<{
   handleHide: (state: boolean) => void;
   hide: boolean;
-}> = ({ handleHide, hide }) => {
+  addToast: (
+    id: string,
+    message: string,
+    type: string,
+    icon: string,
+    fill: string,
+    background: string
+  ) => void;
+}> = ({ handleHide, hide, addToast }) => {
   const addTodo = useTodoStore((state) => state.createTodo);
   const [createTodo, setCreateTodo] = useState<string>("");
 
@@ -14,7 +22,7 @@ const BottomDrawer: React.FC<{
     setCreateTodo(e.target.value);
   };
 
-  const handleAddTodo = useCallback(() => {
+  const handleAddTodo = () => {
     if (createTodo === "") {
       return;
     } else {
@@ -23,10 +31,18 @@ const BottomDrawer: React.FC<{
         completed: false,
         userId: Math.floor(Math.random() * 1000),
       });
+      addToast(
+        "toast-success",
+        "Task Added successfully.",
+        "success",
+        "check-icon",
+        "green",
+        "bg-green-100"
+      );
       handleHide(false);
       setCreateTodo("");
     }
-  }, [addTodo, createTodo, handleHide]);
+  };
 
   return (
     <div>
@@ -84,6 +100,7 @@ const BottomDrawer: React.FC<{
                 rows={5}
                 value={createTodo}
                 onChange={handleCreateTodo}
+                placeholder="Add task for today"
               ></textarea>
             </div>
             <div className="grid grid-cols-2 gap-3">

@@ -12,6 +12,7 @@ import FullCalendar from "./components/FullCalender";
 import InputTask from "./components/InputTask";
 import AddTodoBottomDrawer from "./components/bottomDrawers/AddTodo";
 import EditTodoBottomDrawer from "./components/bottomDrawers/EditTodo";
+import Toast from "./components/toastsNotification/Toast";
 
 function App() {
   const getPaginatedTodo = useTodoStore((state) => state.getPagination);
@@ -20,8 +21,6 @@ function App() {
 
   const openCreateTodo = useTodoStore((state) => state.isCreateTodo);
 
-  // console.log(openCreateTodo);
-
   const openEditTodo = useTodoStore((state) => state.isEditTodo);
 
   const [isTranslate, setTranslate] = useState<boolean>(false);
@@ -29,14 +28,47 @@ function App() {
 
   const handleTranslate = (state: boolean, item?: {}) => {
     setTranslate(state);
-    // console.table(item);
   };
 
   const handleEditOnMobile = (state: boolean, item?: {}) => {
-    // openModal(true);
     setIsMobileEdit(state);
   };
 
+  const [toasts, setToasts] = useState<
+    {
+      id: string;
+      message: string;
+      type: string;
+      icon: string;
+      fill: string;
+      background: string;
+    }[]
+  >([]);
+
+  const addToast = (
+    id: string,
+    message: string,
+    type: string,
+    icon: string,
+    fill: string,
+    background: string
+  ) => {
+    // const id = Date.now().toString(); // Generate a unique ID for the toast
+    const newToast = {
+      id,
+      message,
+      type,
+      icon,
+      fill,
+      background,
+    };
+
+    setToasts((prevToasts) => [...prevToasts, newToast]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
+  };
   useEffect(() => {
     getPaginatedTodo();
   }, [getPaginatedTodo]);
@@ -66,11 +98,11 @@ function App() {
           </div>
           <div className="w-full hidden sm:block">
             {openModal ? (
-              <OptionsModal />
+              <OptionsModal addToast={addToast} />
             ) : openCreateTodo ? (
-              <CreateTodo header="Add Task" />
+              <CreateTodo header="Add Task" addToast={addToast} />
             ) : openEditTodo ? (
-              <CreateTodo header="Edit Task" />
+              <CreateTodo header="Edit Task" addToast={addToast} />
             ) : (
               <FullCalendar />
             )}
@@ -80,8 +112,12 @@ function App() {
       <footer className="sm:hidden  bg-white text-white fixed bottom-0 right-0 left-0 px-3 py-3">
         <InputTask handleHide={handleTranslate} />
       </footer>
-      <AddTodoBottomDrawer handleHide={handleTranslate} hide={isTranslate} />
-      <EditTodoBottomDrawer handleHide={handleEditOnMobile} hide={isMobileEdit} />
+      <AddTodoBottomDrawer handleHide={handleTranslate} hide={isTranslate} addToast={addToast} />
+      <EditTodoBottomDrawer
+        handleHide={handleEditOnMobile}
+        hide={isMobileEdit} addToast={addToast}
+      />
+      <Toast toasts={toasts} onClose={removeToast} />
     </div>
   );
 }

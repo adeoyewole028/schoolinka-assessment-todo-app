@@ -1,12 +1,22 @@
 import useTodoStore from "../../store/useStore";
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { GrClose } from "react-icons/gr";
 import { Button } from "@nextui-org/react";
+import Loading from "../Loading";
 
 const CreateTodo: React.FC<{
   header: string;
-}> = ({ header }) => {
+  addToast: (
+    id: string,
+    message: string,
+    type: string,
+    icon: string,
+    fill: string,
+    background: string
+  ) => void;
+}> = ({ header, addToast }) => {
   const openModal = useTodoStore((state) => state.setCreateTodo);
+  const isLoading = useTodoStore((state) => state.loading);
   const updateTodo = useTodoStore((state) => state.updateTodo);
   const addTodo = useTodoStore((state) => state.createTodo);
   const editTodo = useTodoStore((state) => state.singleTodo);
@@ -18,8 +28,7 @@ const CreateTodo: React.FC<{
   const handleCreateTodo = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCreateTodo(e.target.value);
   };
-
-  const handleAddTodo = useCallback(() => {
+  const handleAddTodo = () => {
     if (createTodo === "") {
       return;
     } else {
@@ -28,10 +37,19 @@ const CreateTodo: React.FC<{
         completed: false,
         userId: Math.floor(Math.random() * 1000),
       });
-      openModal(false);
+      // Add a success toast when a todo is added
+      addToast(
+        "toast-success",
+        "Task Added successfully.",
+        "success",
+        "check-icon",
+        "green",
+        "bg-green-100"
+      );
+
       setCreateTodo("");
     }
-  }, [addTodo, createTodo, openModal]);
+  };
 
   if (header === "Edit Task") {
     console.log(editTodo);
@@ -43,6 +61,15 @@ const CreateTodo: React.FC<{
 
   const handleSaveTodo = () => {
     updateTodo(editTodo.id, textareaValue, editTodo.completed);
+    // Add a success toast when a todo is updated
+    addToast(
+      "toast-updated",
+      "Task Updated successfully.",
+      "success",
+      "check-icon",
+      "green",
+      "bg-green-100"
+    );
   };
 
   return (
@@ -126,9 +153,12 @@ const CreateTodo: React.FC<{
               </Button>
               <Button
                 onClick={handleSaveTodo}
-                className="bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium w-full"
+                className={`bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium w-full ${
+                  isLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={isLoading}
               >
-                Save
+                <span> {isLoading && <Loading />}</span> Save
               </Button>
             </div>
           </div>
@@ -146,7 +176,9 @@ const CreateTodo: React.FC<{
                 rows={5}
                 value={createTodo}
                 onChange={handleCreateTodo}
+                placeholder="Add task for today"
               ></textarea>
+              {/* {createTodo === "" ? <small>Please add a task</small> : ""} */}
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
               <div className="col-span-5 lg:col-span-1">
@@ -206,9 +238,12 @@ const CreateTodo: React.FC<{
               </Button>
               <Button
                 onClick={handleAddTodo}
-                className="bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium"
+                className={`bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium ${
+                  isLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={isLoading}
               >
-                Add
+                <span> {isLoading && <Loading />}</span> Add
               </Button>
             </div>
           </div>
