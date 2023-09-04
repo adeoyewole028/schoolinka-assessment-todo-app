@@ -38,18 +38,18 @@ export default function OptionsModal() {
           </p>
         </div>
 
-        <div className="flex self-center mt-8">
-          <div className="flex gap-3">
+        <div className="mt-8">
+          <div className="grid grid-cols-2 gap-3 w-full">
             <Button
               onClick={handleDeleteTodo}
-              className="px-[1em] lg:px-[3.5em] py-1.5 border rounded-md bg-white font-medium"
+              className="border rounded-md bg-white font-medium"
             >
               Delete
             </Button>
             <Button
               disabled={singleTodo.completed}
               onClick={() => openEditTodo(true)}
-              className={`bg-[#3F5BF6] text-white px-[1em] lg:px-[3.5em] py-1 border rounded-md font-medium ${
+              className={`bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium ${
                 singleTodo.completed ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >

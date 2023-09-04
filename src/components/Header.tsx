@@ -15,7 +15,7 @@ export default function Header() {
       <div className="hidden md:flex">
         <Button
           onClick={() => openCreateTodo(true)}
-          className="bg-[#3F5BF6] text-white px-4"
+          className="bg-[#3F5BF6] hover:bg-[#0E31F2] text-white px-4"
         >
           <span className="text-white">
             <FiPlus />

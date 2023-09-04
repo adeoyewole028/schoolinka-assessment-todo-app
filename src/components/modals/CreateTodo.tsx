@@ -20,13 +20,17 @@ const CreateTodo: React.FC<{
   };
 
   const handleAddTodo = useCallback(() => {
-    addTodo({
-      title: createTodo,
-      completed: false,
-      userId: Math.floor(Math.random() * 1000),
-    });
-    openModal(false);
-    setCreateTodo("");
+    if (createTodo === "") {
+      return;
+    } else {
+      addTodo({
+        title: createTodo,
+        completed: false,
+        userId: Math.floor(Math.random() * 1000),
+      });
+      openModal(false);
+      setCreateTodo("");
+    }
   }, [addTodo, createTodo, openModal]);
 
   if (header === "Edit Task") {
@@ -122,7 +126,7 @@ const CreateTodo: React.FC<{
               </Button>
               <Button
                 onClick={handleSaveTodo}
-                className="bg-[#3F5BF6] text-white border rounded-md font-medium w-full"
+                className="bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium w-full"
               >
                 Save
               </Button>
@@ -202,7 +206,7 @@ const CreateTodo: React.FC<{
               </Button>
               <Button
                 onClick={handleAddTodo}
-                className="bg-[#3F5BF6] text-white border rounded-md font-medium"
+                className="bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium"
               >
                 Add
               </Button>

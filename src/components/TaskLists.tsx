@@ -2,7 +2,10 @@ import React from "react";
 import useTodoStore from "../store/useStore";
 import Pagination from "../components/Pagination";
 
-const TaskLists: React.FC<{}> = () => {
+const TaskLists: React.FC<{
+  handleHide: (state: boolean, item: {}) => void;
+  hide: boolean;
+}> = ({ handleHide, hide }) => {
   const todo = useTodoStore((state) => state.paginatedTodo);
   const openModal = useTodoStore((state) => state.setIsModal);
   const updateTodo = useTodoStore((state) => state.updateTodo);
@@ -20,14 +23,15 @@ const TaskLists: React.FC<{}> = () => {
       e.target.tagName.toLowerCase() !== "input" ||
       e.target.type !== "checkbox"
     ) {
-      console.log("is modal");
+      //   console.log("is modal");
       openModal(true, item);
+      handleHide(true, item);
     } else {
       try {
         const updatedTodo = { ...item, completed: !item.completed };
         updateTodo(item.id, updatedTodo.title, updatedTodo.completed);
         openModal(false, item);
-        console.log("is updated");
+        // console.log("is updated");
       } catch (error) {
         console.log(error);
       }
@@ -43,11 +47,13 @@ const TaskLists: React.FC<{}> = () => {
           <div
             onClick={(e) => handleCompleteCheck(e, item)}
             key={item.id}
-            className={`flex justify-between border rounded shadow bg-gray-100/75 w-full p-2 items-center text-sm px-4 cursor-pointer ${
-              item.completed ? "line-through" : ""
-            }`}
+            className={`flex justify-between border rounded shadow bg-gray-100/75 w-full p-2 items-center text-sm px-4 cursor-pointer`}
           >
-            <div className="flex gap-3 items-center">
+            <div
+              className={`flex gap-3 items-center ${
+                item.completed ? "line-through text-gray-400" : ""
+              }`}
+            >
               <input
                 onChange={(e) => handleCompleteCheck(e, item)}
                 className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"

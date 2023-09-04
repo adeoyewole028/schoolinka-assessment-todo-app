@@ -165,14 +165,14 @@ const Calendar = () => {
                   key={dayIdx}
                   type="button"
                   className={[
-                    "py-1.5 hover:bg-gray-100 focus:z-10 hover:text-black",
+                    "py-1.5  hover:bg-[#0E31F2] hover:text-white hover:rounded-full focus:z-10 ",
                     day.isToday && "font-semibold",
                     dayIdx === 0 && "rounded",
                     dayIdx === 6 && "rounded",
                     dayIdx === currentMonthDays.length - 7 && "rounded",
                     dayIdx === currentMonthDays.length - 1 && "rounded",
                     isDateSelected(day.date)
-                      ? "bg-[#3F5BF6] rounded-full text-white hover:text-gray-400"
+                      ? "bg-[#3F5BF6] rounded-full text-white  hover:bg-[#0E31F2] hover:text-white"
                       : "",
                   ].join(" ")}
                   onClick={() => selectDate(day.date)}

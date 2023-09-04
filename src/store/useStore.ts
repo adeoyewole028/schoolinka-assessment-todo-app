@@ -80,7 +80,7 @@ const useTodoStore = create<TodoStore>()(
             completed: boolean;
           }
         ) => {
-          console.log(singleTodo);
+        //   console.log(singleTodo);
           set({ singleTodo: singleTodo });
           set({ isModal: isModal });
           set({ isCreateTodo: false });
@@ -100,7 +100,6 @@ const useTodoStore = create<TodoStore>()(
             );
 
             const data = await res.json();
-            console.log(data);
             if (data) {
               set({ todo: data });
             }

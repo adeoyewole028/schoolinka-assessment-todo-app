@@ -84,7 +84,7 @@ export default function Nav() {
             </Dropdown>
           </div>
           <button
-            className="sm:hidden text-base"
+            className="sm:hidden text-xl"
             type="button"
             data-drawer-target="drawer-right-example"
             data-drawer-show="drawer-right-example"
