@@ -19,10 +19,20 @@ const CreateTodo: React.FC<{
   const updateTodo = useTodoStore((state) => state.updateTodo);
   const addTodo = useTodoStore((state) => state.createTodo);
   const editTodo = useTodoStore((state) => state.singleTodo);
-  const [textareaValue, setTextareaValue] = useState<string>(
-    editTodo?.title || ""
-  );
-  const [createTodo, setCreateTodo] = useState<string>("");
+
+  const [createTodo, setCreateTodo] = useState<{
+    title: string;
+    date: string;
+    start_time: string;
+    stop_time: string;
+    updatedAt: string;
+  }>({
+    title: "",
+    date: "",
+    start_time: "",
+    stop_time: "",
+    updatedAt: "",
+  });
   const [toastTimeout, setToastTimeout] = useState<NodeJS.Timeout | null>(null);
   useEffect(() => {
     return () => {
@@ -32,19 +42,34 @@ const CreateTodo: React.FC<{
     };
   }, [toastTimeout]);
 
-  const handleCreateTodo = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCreateTodo(e.target.value);
+  const handleCreateTodoTextarea = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setCreateTodo({
+      ...createTodo,
+      [name]: value,
+    });
+  };
+
+  const handleCreateTodoInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setCreateTodo({
+      ...createTodo,
+      [name]: value,
+    });
   };
 
   const handleAddTodo = () => {
-    if (createTodo === "") {
+    if (
+      createTodo.title === "" ||
+      createTodo.date === "" ||
+      createTodo.start_time === "" ||
+      createTodo.stop_time === ""
+    ) {
       return;
     } else {
-      addTodo({
-        title: createTodo,
-        completed: false,
-        userId: Math.floor(Math.random() * 1000),
-      });
+      addTodo(createTodo);
 
       if (toastTimeout) {
         clearTimeout(toastTimeout);
@@ -62,17 +87,32 @@ const CreateTodo: React.FC<{
 
       setToastTimeout(newTimeout);
 
-      setCreateTodo("");
+      setCreateTodo({
+        title: "",
+        date: "",
+        start_time: "",
+        stop_time: "",
+        updatedAt: "",
+      });
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setTextareaValue(e.target.value);
+  const handleEditTodoTextArea = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const { value } = e.target;
+    editTodo.title = value;
+  };
+
+  const handleEditTodoInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    console.log(value);
+    (editTodo as any)[name] = value;
   };
 
   const handleUpdateTodo = () => {
     console.log(isLoading, "task");
-    updateTodo(editTodo.id, textareaValue, editTodo.completed);
+    updateTodo(editTodo);
 
     if (toastTimeout) {
       clearTimeout(toastTimeout);
@@ -106,12 +146,12 @@ const CreateTodo: React.FC<{
             <div className="w-full">
               <textarea
                 className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-3 focus:border-sky-500 bg-gray-50"
-                name="edit"
-                id="edit"
+                name="title"
+                id="title"
                 cols={30}
                 rows={5}
-                value={textareaValue}
-                onChange={handleChange}
+                defaultValue={editTodo.title}
+                onChange={handleEditTodoTextArea}
               ></textarea>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
@@ -124,6 +164,7 @@ const CreateTodo: React.FC<{
                   type="date"
                   name="date"
                   id="date"
+                  onChange={handleEditTodoInput}
                 />
               </div>
               <div className="-z-50"></div>
@@ -136,8 +177,9 @@ const CreateTodo: React.FC<{
                     <input
                       className="border ring-1 ring-gray-300 rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 w-full text-sm"
                       type="time"
-                      name="time"
+                      name="start_time"
                       id="time"
+                      onChange={handleEditTodoInput}
                     />
                   </div>
                   <div className="">
@@ -147,8 +189,9 @@ const CreateTodo: React.FC<{
                     <input
                       className="border ring-1 ring-gray-300 rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 w-full text-sm"
                       type="time"
-                      name="time"
+                      name="stop_time"
                       id="time"
+                      onChange={handleEditTodoInput}
                     />
                   </div>
                 </div>
@@ -189,12 +232,11 @@ const CreateTodo: React.FC<{
             <div className="w-full">
               <textarea
                 className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-3 focus:border-sky-500 bg-gray-50"
-                name="create"
-                id="create"
+                name="title"
+                id="title"
                 cols={30}
                 rows={5}
-                value={createTodo}
-                onChange={handleCreateTodo}
+                onChange={handleCreateTodoTextarea}
                 placeholder="Add task for today"
               ></textarea>
               {/* {createTodo === "" ? <small>Please add a task</small> : ""} */}
@@ -209,6 +251,7 @@ const CreateTodo: React.FC<{
                   type="date"
                   name="date"
                   id="date"
+                  onChange={handleCreateTodoInput}
                 />
               </div>
               <div className="-z-50"></div>
@@ -221,8 +264,9 @@ const CreateTodo: React.FC<{
                     <input
                       className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
                       type="time"
-                      name="time"
+                      name="start_time"
                       id="time"
+                      onChange={handleCreateTodoInput}
                     />
                   </div>
                   <div>
@@ -232,8 +276,9 @@ const CreateTodo: React.FC<{
                     <input
                       className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
                       type="time"
-                      name="time"
+                      name="stop_time"
                       id="time"
+                      onChange={handleCreateTodoInput}
                     />
                   </div>
                 </div>

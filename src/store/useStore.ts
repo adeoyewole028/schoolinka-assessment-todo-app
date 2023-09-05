@@ -1,10 +1,12 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { Todo } from "../typings/model";
+import { addTodo, updateTodo, deleteTodo, getTodos } from "../api/apiRequest";
 
 type TodoStore = {
+  getAppTodo: () => void;
+  appTodo: Todo[];
   todo: Todo[];
-  getTodo: () => void;
   loading: boolean;
   paginatedTodo: Todo[];
   getPagination: () => void;
@@ -13,42 +15,59 @@ type TodoStore = {
   totalPages: number;
   setCurrentPage: (page: number) => void;
   isModal: boolean;
-  id: number;
+  id: string;
   singleTodo: {
-    id: number;
-    userId: number;
+    id: string;
     title: string;
     completed: boolean;
+    date: string;
+    start_time: string;
+    stop_time: string;
+    updatedAt: string;
   };
   setIsModal: (
     isModal: boolean,
-    singleTodo?: {
-      id: number;
-      userId: number;
+    todo?: {
+      id: string;
       title: string;
       completed: boolean;
+      date: string;
+      start_time: string;
+      stop_time: string;
+      updatedAt: string;
     }
   ) => void;
-  deleteTodo: (id: number) => void;
+  deleteTodo: (id: string) => void;
   createTodo: (todo: {
     title: string;
-    completed: boolean;
-    userId: number;
+    date: string;
+    start_time: string;
+    stop_time: string;
+    updatedAt: string;
   }) => void;
   isCreateTodo: boolean;
   setCreateTodo: (isCreateTodo: boolean) => void;
   isEditTodo: boolean;
-  updateTodo: (id: number, title: string, completed: boolean) => void;
+  updateTodo: (todo: {
+    id: string;
+    title: string;
+    completed: boolean;
+    date: string;
+    start_time: string;
+    stop_time: string;
+    updatedAt: string;
+  }) => void;
   setEditTodo: (isEditTodo: boolean) => void;
   taskLoading: {
-    [key: number]: boolean;
+    [key: string]: boolean;
   };
 };
 const useTodoStore = create<TodoStore>()(
   devtools(
     persist(
       (set, get) => ({
-        id: 0,
+        appTodo: [] as Todo[],
+        id: "",
         todo: [] as Todo[],
         paginatedTodo: [],
         currentPage: 1,
@@ -56,10 +75,13 @@ const useTodoStore = create<TodoStore>()(
         totalPages: 0,
         isModal: false,
         singleTodo: {
-          id: 0,
-          userId: 0,
+          id: "",
           title: "",
           completed: false,
+          date: "",
+          start_time: "",
+          stop_time: "",
+          updatedAt: "",
         },
         loading: true,
         isCreateTodo: false,
@@ -77,188 +99,127 @@ const useTodoStore = create<TodoStore>()(
 
         setIsModal: (
           isModal: boolean,
-          singleTodo?: {
-            id: number;
-            userId: number;
+          todo?: {
+            id: string;
             title: string;
             completed: boolean;
+            date: string;
+            start_time: string;
+            stop_time: string;
+            updatedAt: string;
           }
         ) => {
-          set({ singleTodo: singleTodo });
+          set({ singleTodo: todo });
           set({ isModal: isModal });
           set({ isCreateTodo: false });
           set({ isEditTodo: false });
         },
-
-        getTodo: async () => {
-          try {
-            set({ loading: true });
-            const res = await fetch(
-              "https://jsonplaceholder.typicode.com/todos",
-              {
-                method: "GET",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              }
-            );
-
-            const data = await res.json();
-            if (data) {
-              set({ todo: data });
-              set({ loading: false });
-            }
-          } catch (err) {
-            console.log(err);
-            set({ loading: false });
-          }
-        },
-
         createTodo: async (todo: {
           title: string;
-          completed: boolean;
-          userId: number;
+          date: string;
+          start_time: string;
+          stop_time: string;
+          updatedAt: string;
         }) => {
-          try {
-            set({ loading: true });
-            const res = await fetch(
-              "https://jsonplaceholder.typicode.com/todos",
-              {
-                method: "POST",
-                body: JSON.stringify({
-                  title: todo.title,
-                  completed: todo.completed,
-                  userId: todo.userId,
-                }),
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              }
-            );
-            if (res.status !== 201) {
-              throw new Error("Failed to create todo");
-            } else {
-              const data = await res.json();
-              console.log(data, "new data");
-
-              // Add the new task to the beginning of the todo array
-              set((state) => ({ todo: [data, ...state.todo] }));
-
-              // Update paginatedTodo based on the current page
-              const { currentPage, itemsPerPage, todo } = get();
-              const indexOfLastItem = currentPage * itemsPerPage;
-              const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-              const currentItems = todo.slice(
-                indexOfFirstItem,
-                indexOfLastItem
-              );
-              set({ paginatedTodo: currentItems });
-
-              set({ loading: false });
-            }
-          } catch (err) {
-            console.log(err);
-            set({ loading: false });
+          const data = await addTodo(
+            todo.title,
+            todo.date,
+            todo.start_time,
+            todo.stop_time,
+            todo.updatedAt
+          );
+          console.log(data);
+          if (data) {
+            set((state) => ({
+              ...state,
+              appTodo: [data, ...state.appTodo],
+            }));
           }
+
+          // Update paginatedTodo based on the current page
+          const { currentPage, itemsPerPage, appTodo, getAppTodo } = get();
+          await getAppTodo();
+          console.log(appTodo);
+          const indexOfLastItem = currentPage * itemsPerPage;
+          const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+          const currentItems = appTodo.slice(indexOfFirstItem, indexOfLastItem);
+          set({ paginatedTodo: currentItems });
         },
 
-        deleteTodo: async (id: number) => {
-          try {
-            set({ loading: true });
-            const res = await fetch(
-              `https://jsonplaceholder.typicode.com/todos/${id}`,
-              {
-                method: "DELETE",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              }
-            );
+        deleteTodo: async (id: string) => {
+          const res = await deleteTodo(id);
+          console.log(res);
+          const newTodo = get().appTodo.filter((todo) => todo.id !== id);
+          set({ appTodo: newTodo });
 
-            if (res.status !== 200) {
-              throw new Error("Failed to delete todo");
-            } else {
-              const newTodo = get().todo.filter((todo) => todo.id !== id);
-              set({ todo: newTodo });
-
-              const { currentPage, itemsPerPage, todo } = get();
-              const indexOfLastItem = currentPage * itemsPerPage;
-              const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-              const currentItems = todo.slice(
-                indexOfFirstItem,
-                indexOfLastItem
-              );
-              set({ paginatedTodo: currentItems });
-
-              set({ loading: false });
-            }
-          } catch (err) {
-            console.log(err);
-            set({ loading: false });
-          }
+          const { currentPage, itemsPerPage, appTodo } = get();
+          const indexOfLastItem = currentPage * itemsPerPage;
+          const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+          const currentItems = appTodo.slice(indexOfFirstItem, indexOfLastItem);
+          set({ paginatedTodo: currentItems });
         },
 
         taskLoading: {},
         // update todo
-        updateTodo: async (id: number, title: string, completed: boolean) => {
-          try {
-            set({ loading: true });
-            set((state) => ({
-              taskLoading: { ...state.taskLoading, [id]: true },
-            }));
+        updateTodo: async (todo: {
+          id: string;
+          title: string;
+          completed: boolean;
+          date: string;
+          start_time: string;
+          stop_time: string;
+          updatedAt: string;
+        }) => {
+          console.log(todo);
+          const res = await updateTodo(
+            todo.id,
+            todo.title,
+            todo.completed,
+            todo.date,
+            todo.start_time,
+            todo.stop_time,
+            todo.updatedAt
+          );
+          console.table(res);
+          const newTodo = get().paginatedTodo.map((todos) => {
+            if (todos.id === todo.id) {
+              return {
+                ...todos,
+                id: todo.id,
+                title: todo.title,
+                completed: todo.completed,
+                date: todo.date,
+                start_time: todo.start_time,
+                stop_time: todo.stop_time,
+                updatedAt: todo.updatedAt,
+              };
+            }
+            return todos;
+          });
 
-            const res = await fetch(
-              `https://jsonplaceholder.typicode.com/posts/${id}`,
-              {
-                method: "PATCH",
-                body: JSON.stringify({
-                  title: title,
-                  completed: completed,
-                }),
-                headers: {
-                  "Content-type": "application/json; charset=UTF-8",
-                },
-              }
-            );
-
-            const data = await res.json();
-            console.log(data, "new update");
-            set({ loading: false });
-            console.log(get().loading);
-            // update paginated data
-            const newTodo = get().paginatedTodo.map((todo) => {
-              if (todo.id === id) {
-                return {
-                  ...todo,
-                  title: title,
-                  completed: completed,
-                };
-              }
-              return todo;
-            });
-            set({ paginatedTodo: newTodo });
-            set((state) => ({
-              taskLoading: { ...state.taskLoading, [id]: false },
-            }));
-          } catch (err) {
-            console.log(err);
-            set({ loading: false });
-            set((state) => ({
-              taskLoading: { ...state.taskLoading, [id]: false },
-            }));
-          }
+          set({ paginatedTodo: newTodo });
+          set((state) => ({
+            taskLoading: { ...state.taskLoading, [todo.id!]: false },
+          }));
         },
-
+        getAppTodo: async () => {
+          const res = await getTodos();
+          set({ appTodo: res });
+        },
         setCurrentPage: (page: number) => {
           set({ currentPage: page });
         },
 
         getPagination: async () => {
-          const { currentPage, itemsPerPage, getTodo } = get();
-          await getTodo();
+          const { currentPage, itemsPerPage, getAppTodo } = get();
+          await getAppTodo();
 
-          // Sort the todo array by id in descending order (newest first)
-          const sortedTodo = get().todo.sort((a, b) => b.id - a.id);
+          // Sort the todo array by date in descending order (newest first)
+          const sortedTodo = get().appTodo.sort(
+            (a, b) =>
+              new Date(b.updatedAt!).getTime() -
+              new Date(a.updatedAt!).getTime()
+          );
 
           const indexOfLastItem = currentPage * itemsPerPage;
           const indexOfFirstItem = indexOfLastItem - itemsPerPage;

@@ -15,20 +15,60 @@ const BottomDrawer: React.FC<{
   ) => void;
 }> = ({ handleHide, hide, addToast }) => {
   const addTodo = useTodoStore((state) => state.createTodo);
-  const [createTodo, setCreateTodo] = useState<string>("");
+  const [createTodo, setCreateTodo] = useState<{
+    title: string;
+    date: string;
+    start_time: string;
+    stop_time: string;
+    updatedAt: string;
+  }>({
+    title: "",
+    date: "",
+    start_time: "",
+    stop_time: "",
+    updatedAt: "",
+  });
 
-  const handleCreateTodo = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCreateTodo(e.target.value);
+  const handleCreateTodoTextarea = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setCreateTodo({
+      ...createTodo,
+      [name]: value,
+    });
+  };
+
+  const handleCreateTodoInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setCreateTodo({
+      ...createTodo,
+      [name]: value,
+    });
   };
 
   const handleAddTodo = () => {
-    if (createTodo === "") {
+    if (
+      createTodo.title === "" ||
+      createTodo.date === "" ||
+      createTodo.start_time === "" ||
+      createTodo.stop_time === ""
+    ) {
+      addToast(
+        "Please fill all the fields.",
+        "error",
+        "cross-icon",
+        "red",
+        "bg-red-100"
+      );
       return;
     } else {
       addTodo({
-        title: createTodo,
-        completed: false,
-        userId: Math.floor(Math.random() * 1000),
+        title: createTodo.title,
+        date: createTodo.date,
+        start_time: createTodo.start_time,
+        stop_time: createTodo.stop_time,
+        updatedAt: createTodo.updatedAt
       });
       addToast(
         "Task Added successfully.",
@@ -38,7 +78,13 @@ const BottomDrawer: React.FC<{
         "bg-green-100"
       );
       handleHide(false);
-      setCreateTodo("");
+      setCreateTodo({
+        title: "",
+        date: "",
+        start_time: "",
+        stop_time: "",
+        updatedAt: "",
+      });
     }
   };
 
@@ -92,12 +138,11 @@ const BottomDrawer: React.FC<{
             <div className="w-full">
               <textarea
                 className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-3 focus:border-sky-500 bg-gray-50"
-                name="create"
-                id="create"
+                name="title"
+                id="title"
                 cols={30}
                 rows={5}
-                value={createTodo}
-                onChange={handleCreateTodo}
+                onChange={handleCreateTodoTextarea}
                 placeholder="Add task for today"
               ></textarea>
             </div>
@@ -111,6 +156,7 @@ const BottomDrawer: React.FC<{
                   type="date"
                   name="date"
                   id="date"
+                  onChange={handleCreateTodoInput}
                 />
               </div>
               <div className="">
@@ -122,8 +168,9 @@ const BottomDrawer: React.FC<{
                     <input
                       className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
                       type="time"
-                      name="time"
+                      name="start_time"
                       id="time"
+                      onChange={handleCreateTodoInput}
                     />
                   </div>
                   <div>
@@ -133,8 +180,9 @@ const BottomDrawer: React.FC<{
                     <input
                       className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
                       type="time"
-                      name="time"
+                      name="stop_time"
                       id="time"
+                      onChange={handleCreateTodoInput}
                     />
                   </div>
                 </div>

@@ -142,10 +142,16 @@ const Calendar = () => {
               </button>
             </div>
             <div className="flex justify-between items-center">
-              <div className="p-2 font-medium bg-white border hover:bg-gray-400 rounded-md">
+              <div className="p-2 font-medium bg-white border rounded-md">
                 {selectedDateString
-                  ? `${getSelectedMonthName} ${selectedDay}, ${selectedYear}`
-                  : `${monthName} ${currentDayState}, ${currentYearState}`}
+                  ? `${getSelectedMonthName.slice(
+                      0,
+                      3
+                    )} ${selectedDay}, ${selectedYear}`
+                  : `${monthName.slice(
+                    0,
+                    3
+                  )} ${currentDayState}, ${currentYearState}`}
               </div>
               <Button
                 className="p-1 font-medium bg-white border hover:bg-gray-400 rounded-md"
@@ -165,14 +171,14 @@ const Calendar = () => {
                   key={dayIdx}
                   type="button"
                   className={[
-                    "py-1.5  hover:bg-[#0E31F2] hover:text-white hover:rounded-full focus:z-10 ",
+                    "py-1.5 hover:bg-gray-100 hover:rounded-full focus:z-10 hover:text-black",
                     day.isToday && "font-semibold",
                     dayIdx === 0 && "rounded",
                     dayIdx === 6 && "rounded",
                     dayIdx === currentMonthDays.length - 7 && "rounded",
                     dayIdx === currentMonthDays.length - 1 && "rounded",
                     isDateSelected(day.date)
-                      ? "bg-[#3F5BF6] rounded-full text-white  hover:bg-[#0E31F2] hover:text-white"
+                      ? "bg-[#3F5BF6] rounded-full text-white hover:text-gray-400"
                       : "",
                   ].join(" ")}
                   onClick={() => selectDate(day.date)}

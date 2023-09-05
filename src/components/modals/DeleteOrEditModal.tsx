@@ -3,6 +3,7 @@ import { GrClose } from "react-icons/gr";
 import { LuCalendar } from "react-icons/lu";
 import { BiTimeFive } from "react-icons/bi";
 import { Button } from "@nextui-org/react";
+import { formatTimeRange,formatDateRelativeToToday } from "../../lib/utils/timeFormatter";
 
 const OptionsModal: React.FC<{
   addToast: (
@@ -17,6 +18,8 @@ const OptionsModal: React.FC<{
   const openEditTodo = useTodoStore((state) => state.setEditTodo);
   const singleTodo = useTodoStore((state) => state.singleTodo);
   const deleteTodo = useTodoStore((state) => state.deleteTodo);
+
+  console.log(singleTodo);
 
   const handleDeleteTodo = () => {
     deleteTodo(singleTodo.id);
@@ -42,13 +45,15 @@ const OptionsModal: React.FC<{
             <span className="inline-flex text-[#3F5BF6]">
               <LuCalendar />
             </span>
-            20th January, 2023
+            <span className="capitalize">
+              {formatDateRelativeToToday(singleTodo.date)}{" "}
+            </span>
           </p>
           <p className="flex items-center gap-1">
             <span className="inline-flex text-[#3F5BF6]">
               <BiTimeFive />
             </span>
-            8:00 - 10:00 AM
+            {formatTimeRange(singleTodo.start_time, singleTodo.stop_time)}
           </p>
         </div>
 

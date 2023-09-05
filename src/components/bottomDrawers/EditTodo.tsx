@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@nextui-org/react";
 import { GrClose } from "react-icons/gr";
 import { LuCalendar } from "react-icons/lu";
@@ -19,9 +19,21 @@ const BottomDrawer: React.FC<{
   const updateTodo = useTodoStore((state) => state.updateTodo);
   const singleTodo = useTodoStore((state) => state.singleTodo);
   const editTodo = useTodoStore((state) => state.singleTodo);
-  const [textareaValue, setTextareaValue] = useState<string>(
-    editTodo?.title || ""
-  );
+  //   const [edit, setEdit] = useState<{
+  //     id: string;
+  //     completed: boolean;
+  //     title: string;
+  //     date: string;
+  //     start_time: string;
+  //     stop_time: string;
+  //   }>({
+  //     title: editTodo.title,
+  //     date: "",
+  //     start_time: "",
+  //     stop_time: "",
+  //     id: editTodo.id,
+  //     completed: false,
+  //   });
   const deleteTodo = useTodoStore((state) => state.deleteTodo);
   const [isEditTodo, setIsEditTodo] = useState<boolean>(false);
   const [editOrDelete, setEditOrDelete] = useState<boolean>(true);
@@ -49,21 +61,47 @@ const BottomDrawer: React.FC<{
     handleHide(false);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setTextareaValue(e.target.value);
+  const handleEditTodoTextArea = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const { value } = e.target;
+    editTodo.title = value;
   };
 
-  const handleSaveTodo = () => {
-    updateTodo(editTodo.id, textareaValue, editTodo.completed);
-    // setTextareaValue(textareaValue);
-    addToast(
-      "Task Updated successfully.",
-      "success",
-      "check-icon",
-      "green",
-      "bg-green-100"
-    );
+  const handleEditTodoInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    (editTodo as any)[name] = value;
+  };
+
+  const [toastTimeout, setToastTimeout] = useState<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    return () => {
+      if (toastTimeout) {
+        clearTimeout(toastTimeout);
+      }
+    };
+  }, [toastTimeout]);
+
+  const handleUpdateTodo = () => {
+    updateTodo(editTodo);
+
+    if (toastTimeout) {
+      clearTimeout(toastTimeout);
+    }
+
+    const newTimeout = setTimeout(() => {
+      addToast(
+        "Task Updated successfully.",
+        "success",
+        "check-icon",
+        "green",
+        "bg-green-100"
+      );
+    }, 2000);
+
     handleHide(false);
+    setToastTimeout(newTimeout);
   };
 
   return (
@@ -163,12 +201,12 @@ const BottomDrawer: React.FC<{
               <div className="w-full">
                 <textarea
                   className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-3 focus:border-sky-500 bg-gray-50"
-                  name="create"
-                  id="create"
+                  name="title"
+                  id="title"
                   cols={30}
                   rows={5}
-                  value={textareaValue}
-                  onChange={handleChange}
+                  defaultValue={editTodo.title}
+                  onChange={handleEditTodoTextArea}
                 ></textarea>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -181,6 +219,7 @@ const BottomDrawer: React.FC<{
                     type="date"
                     name="date"
                     id="date"
+                    onChange={handleEditTodoInput}
                   />
                 </div>
                 <div className="">
@@ -192,8 +231,9 @@ const BottomDrawer: React.FC<{
                       <input
                         className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
                         type="time"
-                        name="time"
+                        name="start_time"
                         id="time"
+                        onChange={handleEditTodoInput}
                       />
                     </div>
                     <div>
@@ -203,8 +243,9 @@ const BottomDrawer: React.FC<{
                       <input
                         className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
                         type="time"
-                        name="time"
+                        name="stop_time"
                         id="time"
+                        onChange={handleEditTodoInput}
                       />
                     </div>
                   </div>
@@ -231,7 +272,7 @@ const BottomDrawer: React.FC<{
                 </Button>
                 <Button
                   onClick={() => {
-                    handleSaveTodo();
+                    handleUpdateTodo();
                     handleEditOrDelete();
                   }}
                   className="bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium"

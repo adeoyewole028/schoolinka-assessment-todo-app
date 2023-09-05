@@ -16,7 +16,6 @@ import Toast from "./components/toastsNotification/Toast";
 
 function App() {
   const getPaginatedTodo = useTodoStore((state) => state.getPagination);
-
   const openModal = useTodoStore((state) => state.isModal);
 
   const openCreateTodo = useTodoStore((state) => state.isCreateTodo);
@@ -68,6 +67,9 @@ function App() {
   const removeToast = (id: string) => {
     setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
   };
+  const appTodo = useTodoStore((state) => state.appTodo);
+  console.log(appTodo);
+
   useEffect(() => {
     getPaginatedTodo();
   }, [getPaginatedTodo]);
@@ -111,10 +113,15 @@ function App() {
       <footer className="sm:hidden  bg-white text-white fixed bottom-0 right-0 left-0 px-3 py-3">
         <InputTask handleHide={handleTranslate} />
       </footer>
-      <AddTodoBottomDrawer handleHide={handleTranslate} hide={isTranslate} addToast={addToast} />
+      <AddTodoBottomDrawer
+        handleHide={handleTranslate}
+        hide={isTranslate}
+        addToast={addToast}
+      />
       <EditTodoBottomDrawer
         handleHide={handleEditOnMobile}
-        hide={isMobileEdit} addToast={addToast}
+        hide={isMobileEdit}
+        addToast={addToast}
       />
       <Toast toasts={toasts} onClose={removeToast} />
     </div>
