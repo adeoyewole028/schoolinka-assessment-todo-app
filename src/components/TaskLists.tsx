@@ -49,8 +49,6 @@ const TaskLists: React.FC<{
     }
   };
 
-  const updateDate = new Date().toISOString();
-
   return (
     <div>
       <h4 className="text-start mt-5 font-semibold">My Task</h4>
@@ -105,8 +103,7 @@ const TaskLists: React.FC<{
                 </div>
               </div>
               <div className="capitalize">
-                {formatDateRelativeToToday(item.updatedAt) ??
-                  formatDateRelativeToToday(updateDate)}
+                {formatDateRelativeToToday(item.updatedAt) ?? "Today"}
               </div>
             </div>
           ))}

@@ -6,18 +6,15 @@ import { GrLinkPrevious, GrLinkNext } from "react-icons/gr";
 const Pagination: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
-  // const paginated = useTodoStore((state) => state.getPagination);
   const currPage = useTodoStore((state) => state.setCurrentPage);
   const totalPages = useTodoStore((state) => state.totalPages);
 
   const goToPage = (page: number) => {
-    console.log(page);
     setCurrentPage(Math.min(Math.max(page, 1), totalPages));
   };
   useEffect(() => {
     const pageFromQuery =
       Number(new URLSearchParams(window.location.search).get("page")) || 1;
-    // paginated();
     currPage(pageFromQuery);
     setCurrentPage(pageFromQuery);
   }, [ currPage]);
@@ -27,7 +24,6 @@ const Pagination: React.FC = () => {
       className="flex w-full justify-between rounded-md"
       aria-label="Pagination"
     >
-      {/* Previous button */}
       <Link
         href={`?page=${currentPage}`}
         className={`relative inline-flex items-center sm:px-2 py-2 text-gray-400 text-sm hover:bg-gray-50 focus:z-20 ${
@@ -59,7 +55,7 @@ const Pagination: React.FC = () => {
             return (
               <Link
                 key={pageNumber}
-                href={`?page=${pageNumber}`} // Update this to your actual link or route
+                href={`?page=${pageNumber}`} 
                 className={`relative flex justify-center items-center   w-6 sm:h-10 sm:w-10  rounded-full text-xs font-semibold ${
                   pageNumber === currentPage
                     ? "text-black bg-gray-200"

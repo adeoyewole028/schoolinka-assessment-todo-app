@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@nextui-org/react";
 import { GrClose } from "react-icons/gr";
 import useTodoStore from "../../store/useStore";
+import Loading from "../Loading";
 
 const BottomDrawer: React.FC<{
   handleHide: (state: boolean) => void;
@@ -14,8 +15,8 @@ const BottomDrawer: React.FC<{
     background: string
   ) => void;
 }> = ({ handleHide, hide, addToast }) => {
-  const addTodo = useTodoStore((state) => state.createTodo);
-  const [createTodo, setCreateTodo] = useState<{
+  const { createTodo, taskLoading } = useTodoStore();
+  const [newTodo, setNewTodo] = useState<{
     title: string;
     date: string;
     start_time: string;
@@ -33,58 +34,71 @@ const BottomDrawer: React.FC<{
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setCreateTodo({
-      ...createTodo,
+    setNewTodo({
+      ...newTodo,
       [name]: value,
     });
   };
 
   const handleCreateTodoInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setCreateTodo({
-      ...createTodo,
+    setNewTodo({
+      ...newTodo,
       [name]: value,
     });
   };
 
-  const handleAddTodo = () => {
+  const handleAddTodo = async () => {
     if (
-      createTodo.title === "" ||
-      createTodo.date === "" ||
-      createTodo.start_time === "" ||
-      createTodo.stop_time === ""
+      newTodo.title === "" ||
+      newTodo.date === "" ||
+      newTodo.start_time === "" ||
+      newTodo.stop_time === ""
     ) {
-      addToast(
-        "Please fill all the fields.",
-        "error",
-        "cross-icon",
-        "red",
-        "bg-red-100"
-      );
       return;
     } else {
-      addTodo({
-        title: createTodo.title,
-        date: createTodo.date,
-        start_time: createTodo.start_time,
-        stop_time: createTodo.stop_time,
-        updatedAt: createTodo.updatedAt
-      });
-      addToast(
-        "Task Added successfully.",
-        "success",
-        "check-icon",
-        "green",
-        "bg-green-100"
-      );
-      handleHide(false);
-      setCreateTodo({
-        title: "",
-        date: "",
-        start_time: "",
-        stop_time: "",
-        updatedAt: "",
-      });
+      // Check if "createTodo" task is currently loading
+      if (taskLoading.createTodo) {
+        return; // Do nothing if the task is still loading
+      }
+
+      try {
+        // Set the "taskLoading.createTodo" flag to true to indicate loading
+        useTodoStore.setState({
+          taskLoading: { ...taskLoading, createTodo: true },
+        });
+
+        // Call the "createTodo" function
+        await createTodo(newTodo);
+
+        // Show success toast
+        addToast(
+          "Task Added successfully.",
+          "success",
+          "check-icon",
+          "green",
+          "bg-green-100"
+        );
+      } catch (error) {
+        // Handle any errors here if necessary
+        console.error("Error occurred during createTodo:", error);
+      } finally {
+        // Reset the "newTodo" state
+        setNewTodo({
+          title: "",
+          date: "",
+          start_time: "",
+          stop_time: "",
+          updatedAt: "",
+        });
+
+        // close modal
+        handleHide(false);
+        // Set the "taskLoading.createTodo" flag back to false
+        useTodoStore.setState({
+          taskLoading: { ...taskLoading, createTodo: false },
+        });
+      }
     }
   };
 
@@ -208,7 +222,14 @@ const BottomDrawer: React.FC<{
                 onClick={handleAddTodo}
                 className="bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium"
               >
-                Add
+                {taskLoading.createTodo ? (
+                  <span className="inline-flex items-center">
+                    <Loading />
+                    Adding...
+                  </span>
+                ) : (
+                  "Add"
+                )}
               </Button>
             </div>
           </div>

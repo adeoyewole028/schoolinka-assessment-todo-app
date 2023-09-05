@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Link,
   DropdownItem,
@@ -10,6 +11,11 @@ import { FiBell, FiSettings } from "react-icons/fi";
 import { HiBars3CenterLeft } from "react-icons/hi2";
 
 export default function Nav() {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const toggleDrawer = () => {
+    setIsDrawerOpen(!isDrawerOpen);
+  };
   return (
     <>
       <nav className="fixed w-full top-0 left-0 right-0 z-40 bg-white border-gray-200 dark:bg-gray-900 shadow-md">
@@ -84,18 +90,17 @@ export default function Nav() {
             </Dropdown>
           </div>
           <button
+            onClick={toggleDrawer}
             className="sm:hidden text-xl"
             type="button"
-            data-drawer-target="drawer-right-example"
-            data-drawer-show="drawer-right-example"
-            data-drawer-placement="right"
-            aria-controls="drawer-right-example"
           >
             <HiBars3CenterLeft />
           </button>
           <div
-            id="drawer-right-example"
-            className="fixed top-0 right-0 z-40 h-screen p-4 overflow-y-auto transition-transform translate-x-full bg-white w-80 dark:bg-gray-800"
+            id="drawer-right"
+            className={`fixed top-0 right-0 z-40 h-screen p-4 overflow-y-auto transition-transform ${
+              isDrawerOpen ? "translate-x-0" : "translate-x-full"
+            } bg-white w-80 dark:bg-gray-800`}
             tabIndex={-1}
             aria-labelledby="drawer-right-label"
           >
@@ -107,8 +112,8 @@ export default function Nav() {
             </h5>
             <button
               type="button"
-              data-drawer-hide="drawer-right-example"
-              aria-controls="drawer-right-example"
+              onClick={toggleDrawer}
+              aria-controls="drawer-right"
               className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 right-2.5 inline-flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white"
             >
               <svg
@@ -152,7 +157,7 @@ export default function Nav() {
               </li>
               <li>
                 <Link href="#" className="text-black">
-                  Sign Out
+                  Log Out
                 </Link>
               </li>
             </ul>

@@ -3,7 +3,10 @@ import { GrClose } from "react-icons/gr";
 import { LuCalendar } from "react-icons/lu";
 import { BiTimeFive } from "react-icons/bi";
 import { Button } from "@nextui-org/react";
-import { formatTimeRange,formatDateRelativeToToday } from "../../lib/utils/timeFormatter";
+import {
+  formatTimeRange,
+  formatDateRelativeToToday,
+} from "../../lib/utils/timeFormatter";
 
 const OptionsModal: React.FC<{
   addToast: (
@@ -14,12 +17,7 @@ const OptionsModal: React.FC<{
     background: string
   ) => void;
 }> = ({ addToast }) => {
-  const openModal = useTodoStore((state) => state.setIsModal);
-  const openEditTodo = useTodoStore((state) => state.setEditTodo);
-  const singleTodo = useTodoStore((state) => state.singleTodo);
-  const deleteTodo = useTodoStore((state) => state.deleteTodo);
-
-  console.log(singleTodo);
+  const { deleteTodo, setEditTodo, singleTodo, setIsModal } = useTodoStore();
 
   const handleDeleteTodo = () => {
     deleteTodo(singleTodo.id);
@@ -30,12 +28,12 @@ const OptionsModal: React.FC<{
       "red",
       "bg-red-100"
     );
-    openModal(false);
+    setIsModal(false);
   };
 
   return (
     <div className="w-full shadow-md flex flex-col p-5 text-sm border-gray-100 border rounded-md">
-      <button onClick={() => openModal(false)} className="self-end text-xs">
+      <button onClick={() => setIsModal(false)} className="self-end text-xs">
         <GrClose />
       </button>
       <div className="flex flex-col ">
@@ -67,7 +65,7 @@ const OptionsModal: React.FC<{
             </Button>
             <Button
               disabled={singleTodo.completed}
-              onClick={() => openEditTodo(true)}
+              onClick={() => setEditTodo(true)}
               className={`bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium ${
                 singleTodo.completed ? "opacity-50 cursor-not-allowed" : ""
               }`}

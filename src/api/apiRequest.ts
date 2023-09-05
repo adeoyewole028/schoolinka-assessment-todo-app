@@ -1,3 +1,5 @@
+// apiRequest.ts
+
 import { ID, account, database } from "./appwrite";
 export const getSession = async () => {
   try {
@@ -52,7 +54,6 @@ export const addTodo = async (
         stop_time: stop_time,
       }
     );
-    console.log(data);
     const idMatch = data.$id.match(/\d+/g);
     const id = idMatch ? parseInt(idMatch.join("")) : 0;
     return {
@@ -73,12 +74,11 @@ export const addTodo = async (
 
 export const deleteTodo = async (id: string) => {
   try {
-    const data = await database.deleteDocument(
+    await database.deleteDocument(
       process.env.REACT_APP_PUBLIC_DATABASE_ID!,
       process.env.REACT_APP_PUBLIC_TODO_ID!,
       id
     );
-    console.log(data);
     return id;
   } catch (error) {
     console.error("Error occurred during deleteTodo:", error);
@@ -108,7 +108,6 @@ export const updateTodo = async (
         stop_time: stop_time,
       }
     );
-    console.log(data);
     return {
       id: id,
       title: data.title,
@@ -134,7 +133,6 @@ export const updateAllTodos = async (completed: boolean) => {
         completed: completed,
       }
     );
-    console.log(data);
     return data;
   } catch (error) {
     console.error("Error occurred during updateAllTodos:", error);
@@ -149,7 +147,6 @@ export const deleteAllTodos = async () => {
       "*",
       process.env.REACT_APP_PUBLIC_TODO_ID!
     );
-    console.log(data);
     return data;
   } catch (error) {
     console.error("Error occurred during deleteAllTodos:", error);

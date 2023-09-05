@@ -1,3 +1,5 @@
+// store.ts
+
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { Todo } from "../typings/model";
@@ -7,7 +9,6 @@ type TodoStore = {
   getAppTodo: () => void;
   appTodo: Todo[];
   todo: Todo[];
-  loading: boolean;
   paginatedTodo: Todo[];
   getPagination: () => void;
   currentPage: number;
@@ -83,7 +84,6 @@ const useTodoStore = create<TodoStore>()(
           stop_time: "",
           updatedAt: "",
         },
-        loading: true,
         isCreateTodo: false,
         isEditTodo: false,
         setEditTodo: (isEditTodo: boolean) => {
@@ -121,42 +121,69 @@ const useTodoStore = create<TodoStore>()(
           stop_time: string;
           updatedAt: string;
         }) => {
-          const data = await addTodo(
-            todo.title,
-            todo.date,
-            todo.start_time,
-            todo.stop_time,
-            todo.updatedAt
-          );
-          console.log(data);
-          if (data) {
+          try {
+            // Set loading state to true
             set((state) => ({
-              ...state,
-              appTodo: [data, ...state.appTodo],
+              taskLoading: { ...state.taskLoading, createTodo: true },
+            }));
+
+            const data = await addTodo(
+              todo.title,
+              todo.date,
+              todo.start_time,
+              todo.stop_time,
+              todo.updatedAt
+            );
+
+
+            if (data) {
+              set((state) => ({
+                ...state,
+                appTodo: [data, ...state.appTodo],
+              }));
+            }
+
+            // Update paginatedTodo based on the current page
+            const { currentPage, itemsPerPage, appTodo, getAppTodo } = get();
+            await getAppTodo();
+            const indexOfLastItem = currentPage * itemsPerPage;
+            const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+            const currentItems = appTodo.slice(
+              indexOfFirstItem,
+              indexOfLastItem
+            );
+            set({ paginatedTodo: currentItems });
+          } finally {
+            // Set loading state back to false when the task completes (whether it succeeds or fails)
+            set((state) => ({
+              taskLoading: { ...state.taskLoading, createTodo: false },
             }));
           }
-
-          // Update paginatedTodo based on the current page
-          const { currentPage, itemsPerPage, appTodo, getAppTodo } = get();
-          await getAppTodo();
-          console.log(appTodo);
-          const indexOfLastItem = currentPage * itemsPerPage;
-          const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-          const currentItems = appTodo.slice(indexOfFirstItem, indexOfLastItem);
-          set({ paginatedTodo: currentItems });
         },
 
         deleteTodo: async (id: string) => {
-          const res = await deleteTodo(id);
-          console.log(res);
-          const newTodo = get().appTodo.filter((todo) => todo.id !== id);
-          set({ appTodo: newTodo });
+          try {
+            set((state) => ({
+              taskLoading: { ...state.taskLoading, [id]: true },
+            }));
 
-          const { currentPage, itemsPerPage, appTodo } = get();
-          const indexOfLastItem = currentPage * itemsPerPage;
-          const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-          const currentItems = appTodo.slice(indexOfFirstItem, indexOfLastItem);
-          set({ paginatedTodo: currentItems });
+             await deleteTodo(id);
+            const newTodo = get().appTodo.filter((todo) => todo.id !== id);
+            set({ appTodo: newTodo });
+
+            const { currentPage, itemsPerPage, appTodo } = get();
+            const indexOfLastItem = currentPage * itemsPerPage;
+            const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+            const currentItems = appTodo.slice(
+              indexOfFirstItem,
+              indexOfLastItem
+            );
+            set({ paginatedTodo: currentItems });
+          } finally {
+            set((state) => ({
+              taskLoading: { ...state.taskLoading, [id]: false },
+            }));
+          }
         },
 
         taskLoading: {},
@@ -170,37 +197,47 @@ const useTodoStore = create<TodoStore>()(
           stop_time: string;
           updatedAt: string;
         }) => {
-          console.log(todo);
-          const res = await updateTodo(
-            todo.id,
-            todo.title,
-            todo.completed,
-            todo.date,
-            todo.start_time,
-            todo.stop_time,
-            todo.updatedAt
-          );
-          console.table(res);
-          const newTodo = get().paginatedTodo.map((todos) => {
-            if (todos.id === todo.id) {
-              return {
-                ...todos,
-                id: todo.id,
-                title: todo.title,
-                completed: todo.completed,
-                date: todo.date,
-                start_time: todo.start_time,
-                stop_time: todo.stop_time,
-                updatedAt: todo.updatedAt,
-              };
-            }
-            return todos;
-          });
 
-          set({ paginatedTodo: newTodo });
-          set((state) => ({
-            taskLoading: { ...state.taskLoading, [todo.id!]: false },
-          }));
+          try {
+            set((state) => ({
+              taskLoading: { ...state.taskLoading, [todo.id!]: true },
+            }));
+
+            const res = await updateTodo(
+              todo.id,
+              todo.title,
+              todo.completed,
+              todo.date,
+              todo.start_time,
+              todo.stop_time,
+              todo.updatedAt
+            );
+            console.table(res);
+            const newTodo = get().paginatedTodo.map((todos) => {
+              if (todos.id === todo.id) {
+                return {
+                  ...todos,
+                  id: todo.id,
+                  title: todo.title,
+                  completed: todo.completed,
+                  date: todo.date,
+                  start_time: todo.start_time,
+                  stop_time: todo.stop_time,
+                  updatedAt: todo.updatedAt,
+                };
+              }
+              return todos;
+            });
+
+            set({ paginatedTodo: newTodo });
+            set((state) => ({
+              taskLoading: { ...state.taskLoading, [todo.id!]: false },
+            }));
+          } finally {
+            set((state) => ({
+              taskLoading: { ...state.taskLoading, [todo.id!]: false },
+            }));
+          }
         },
         getAppTodo: async () => {
           const res = await getTodos();

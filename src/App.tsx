@@ -15,18 +15,13 @@ import EditTodoBottomDrawer from "./components/bottomDrawers/EditTodo";
 import Toast from "./components/toastsNotification/Toast";
 
 function App() {
-  const getPaginatedTodo = useTodoStore((state) => state.getPagination);
-  const openModal = useTodoStore((state) => state.isModal);
+  const { getPagination, isModal, isCreateTodo, isEditTodo } = useTodoStore();
 
-  const openCreateTodo = useTodoStore((state) => state.isCreateTodo);
-
-  const openEditTodo = useTodoStore((state) => state.isEditTodo);
-
-  const [isTranslate, setTranslate] = useState<boolean>(false);
+  const [isBottomDrawer, setBottomDrawer] = useState<boolean>(false);
   const [isMobileEdit, setIsMobileEdit] = useState<boolean>(false);
 
-  const handleTranslate = (state: boolean, item?: {}) => {
-    setTranslate(state);
+  const handleBottomDrawer = (state: boolean, item?: {}) => {
+    setBottomDrawer(state);
   };
 
   const handleEditOnMobile = (state: boolean, item?: {}) => {
@@ -67,22 +62,20 @@ function App() {
   const removeToast = (id: string) => {
     setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
   };
-  const appTodo = useTodoStore((state) => state.appTodo);
-  console.log(appTodo);
 
   useEffect(() => {
-    getPaginatedTodo();
-  }, [getPaginatedTodo]);
+    getPagination();
+  }, [getPagination]);
 
   return (
     <div className="mx-auto max-w-7xl pb-10">
       <div
         onClick={() => {
-          handleTranslate(false);
+          handleBottomDrawer(false);
           setIsMobileEdit(false);
         }}
         className={
-          isTranslate || isMobileEdit
+          isBottomDrawer || isMobileEdit
             ? "sm:hidden fixed backdrop top-0 bg-gray-900/30 w-full h-screen z-50 overflow-hidden"
             : ""
         }
@@ -94,15 +87,15 @@ function App() {
           <div className="col-span-2 w-full">
             <SingleCalender />
             <div className="pb-10">
-              <TaskLists handleHide={handleEditOnMobile} hide={isTranslate} />
+              <TaskLists handleHide={handleEditOnMobile} hide={isBottomDrawer} />
             </div>
           </div>
           <div className="w-full hidden sm:block">
-            {openModal ? (
+            {isModal ? (
               <OptionsModal addToast={addToast} />
-            ) : openCreateTodo ? (
+            ) : isCreateTodo ? (
               <CreateTodo header="Add Task" addToast={addToast} />
-            ) : openEditTodo ? (
+            ) : isEditTodo ? (
               <CreateTodo header="Edit Task" addToast={addToast} />
             ) : (
               <FullCalendar />
@@ -111,11 +104,11 @@ function App() {
         </div>
       </main>
       <footer className="sm:hidden  bg-white text-white fixed bottom-0 right-0 left-0 px-3 py-3">
-        <InputTask handleHide={handleTranslate} />
+        <InputTask handleHide={handleBottomDrawer} />
       </footer>
       <AddTodoBottomDrawer
-        handleHide={handleTranslate}
-        hide={isTranslate}
+        handleHide={handleBottomDrawer}
+        hide={isBottomDrawer}
         addToast={addToast}
       />
       <EditTodoBottomDrawer

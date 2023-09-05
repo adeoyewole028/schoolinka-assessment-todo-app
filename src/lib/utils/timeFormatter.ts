@@ -37,10 +37,6 @@ export function formatTimeRange(start_time: string, stop_time: string) {
   return `${formattedStartTime} - ${formattedStopTime}`;
 }
 
-export type TimeRange = {
-  start_time: string; // Represents the start time of the range (e.g., "12:00 PM")
-  stop_time: string; // Represents the end time of the range (e.g., "01:30 PM")
-};
 
 export function convertToAMPM(time: string) {
   //Example - 02:30 PM

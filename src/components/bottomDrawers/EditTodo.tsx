@@ -1,9 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@nextui-org/react";
 import { GrClose } from "react-icons/gr";
 import { LuCalendar } from "react-icons/lu";
 import { BiTimeFive } from "react-icons/bi";
 import useTodoStore from "../../store/useStore";
+import Loading from "../Loading";
+import {
+  formatTimeRange,
+  formatDateRelativeToToday,
+} from "../../lib/utils/timeFormatter";
 
 const BottomDrawer: React.FC<{
   handleHide: (state: boolean) => void;
@@ -16,25 +21,9 @@ const BottomDrawer: React.FC<{
     background: string
   ) => void;
 }> = ({ handleHide, hide, addToast }) => {
-  const updateTodo = useTodoStore((state) => state.updateTodo);
-  const singleTodo = useTodoStore((state) => state.singleTodo);
   const editTodo = useTodoStore((state) => state.singleTodo);
-  //   const [edit, setEdit] = useState<{
-  //     id: string;
-  //     completed: boolean;
-  //     title: string;
-  //     date: string;
-  //     start_time: string;
-  //     stop_time: string;
-  //   }>({
-  //     title: editTodo.title,
-  //     date: "",
-  //     start_time: "",
-  //     stop_time: "",
-  //     id: editTodo.id,
-  //     completed: false,
-  //   });
-  const deleteTodo = useTodoStore((state) => state.deleteTodo);
+
+  const { deleteTodo, taskLoading, singleTodo, updateTodo } = useTodoStore();
   const [isEditTodo, setIsEditTodo] = useState<boolean>(false);
   const [editOrDelete, setEditOrDelete] = useState<boolean>(true);
 
@@ -48,16 +37,28 @@ const BottomDrawer: React.FC<{
     setEditOrDelete(false);
   };
 
-  const handleDeleteTodo = () => {
-    console.log(singleTodo.id);
-    deleteTodo(singleTodo.id);
-    addToast(
-      "Task has been deleted.",
-      "success",
-      "check-icon",
-      "red",
-      "bg-red-100"
-    );
+  const handleDeleteTodo = async () => {
+    if (taskLoading.deleteTodo) {
+      return;
+    }
+    try {
+      useTodoStore.setState({
+        taskLoading: { ...taskLoading, deleteTodo: true },
+      });
+      await deleteTodo(singleTodo.id);
+
+      addToast(
+        "Task has been deleted.",
+        "success",
+        "check-icon",
+        "red",
+        "bg-red-100"
+      );
+    } finally {
+      useTodoStore.setState({
+        taskLoading: { ...taskLoading, deleteTodo: false },
+      });
+    }
     handleHide(false);
   };
 
@@ -74,23 +75,18 @@ const BottomDrawer: React.FC<{
     (editTodo as any)[name] = value;
   };
 
-  const [toastTimeout, setToastTimeout] = useState<NodeJS.Timeout | null>(null);
-  useEffect(() => {
-    return () => {
-      if (toastTimeout) {
-        clearTimeout(toastTimeout);
-      }
-    };
-  }, [toastTimeout]);
-
-  const handleUpdateTodo = () => {
-    updateTodo(editTodo);
-
-    if (toastTimeout) {
-      clearTimeout(toastTimeout);
+  const handleUpdateTodo = async () => {
+    // Check if "updateTodo" task is currently loading
+    if (taskLoading.updateTodo) {
+      return;
     }
 
-    const newTimeout = setTimeout(() => {
+    try {
+      useTodoStore.setState({
+        taskLoading: { ...taskLoading, updateTodo: true },
+      });
+
+      await updateTodo(singleTodo);
       addToast(
         "Task Updated successfully.",
         "success",
@@ -98,10 +94,16 @@ const BottomDrawer: React.FC<{
         "green",
         "bg-green-100"
       );
-    }, 2000);
+    } catch (error) {
+      console.error("Error occurred during updateTodo:", error);
+    } finally {
+      useTodoStore.setState({
+        taskLoading: { ...taskLoading, updateTodo: false },
+      });
 
-    handleHide(false);
-    setToastTimeout(newTimeout);
+      handleEditOrDelete();
+      handleHide(false);
+    }
   };
 
   return (
@@ -162,13 +164,15 @@ const BottomDrawer: React.FC<{
                 <span className="inline-flex text-[#3F5BF6]">
                   <LuCalendar />
                 </span>
-                20th January, 2023
+                <span className="capitalize">
+                  {formatDateRelativeToToday(singleTodo.date)}{" "}
+                </span>
               </p>
               <p className="flex items-center gap-1">
                 <span className="inline-flex text-[#3F5BF6]">
                   <BiTimeFive />
                 </span>
-                8:00 - 10:00 AM
+            {formatTimeRange(singleTodo.start_time, singleTodo.stop_time)}
               </p>
             </div>
 
@@ -178,7 +182,14 @@ const BottomDrawer: React.FC<{
                   onClick={handleDeleteTodo}
                   className="border rounded-md bg-white font-medium"
                 >
-                  Delete
+                  {taskLoading.deleteTodo ? (
+                    <span className="inline-flex items-center">
+                      <Loading />
+                      Deleting...
+                    </span>
+                  ) : (
+                    "Delete"
+                  )}
                 </Button>
                 <Button
                   disabled={singleTodo?.completed}
@@ -273,11 +284,17 @@ const BottomDrawer: React.FC<{
                 <Button
                   onClick={() => {
                     handleUpdateTodo();
-                    handleEditOrDelete();
                   }}
                   className="bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium"
                 >
-                  Save
+                  {taskLoading.updateTodo ? (
+                    <span className="inline-flex items-center">
+                      <Loading />
+                      Updating...
+                    </span>
+                  ) : (
+                    "Save"
+                  )}
                 </Button>
               </div>
             </div>

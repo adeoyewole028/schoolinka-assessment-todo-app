@@ -1,5 +1,5 @@
 import useTodoStore from "../../store/useStore";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { GrClose } from "react-icons/gr";
 import { Button } from "@nextui-org/react";
 import Loading from "../Loading";
@@ -14,13 +14,11 @@ const CreateTodo: React.FC<{
     background: string
   ) => void;
 }> = ({ header, addToast }) => {
-  const openModal = useTodoStore((state) => state.setCreateTodo);
-  const isLoading = useTodoStore((state) => state.loading);
-  const updateTodo = useTodoStore((state) => state.updateTodo);
-  const addTodo = useTodoStore((state) => state.createTodo);
-  const editTodo = useTodoStore((state) => state.singleTodo);
 
-  const [createTodo, setCreateTodo] = useState<{
+  const { setCreateTodo, createTodo, taskLoading, singleTodo, updateTodo } =
+    useTodoStore();
+
+  const [newTodo, setNewTodo] = useState<{
     title: string;
     date: string;
     start_time: string;
@@ -33,49 +31,45 @@ const CreateTodo: React.FC<{
     stop_time: "",
     updatedAt: "",
   });
-  const [toastTimeout, setToastTimeout] = useState<NodeJS.Timeout | null>(null);
-  useEffect(() => {
-    return () => {
-      if (toastTimeout) {
-        clearTimeout(toastTimeout);
-      }
-    };
-  }, [toastTimeout]);
 
   const handleCreateTodoTextarea = (
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setCreateTodo({
-      ...createTodo,
+    setNewTodo({
+      ...newTodo,
       [name]: value,
     });
   };
 
   const handleCreateTodoInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setCreateTodo({
-      ...createTodo,
+    setNewTodo({
+      ...newTodo,
       [name]: value,
     });
   };
 
-  const handleAddTodo = () => {
+  const handleAddTodo = async () => {
     if (
-      createTodo.title === "" ||
-      createTodo.date === "" ||
-      createTodo.start_time === "" ||
-      createTodo.stop_time === ""
+      newTodo.title === "" ||
+      newTodo.date === "" ||
+      newTodo.start_time === "" ||
+      newTodo.stop_time === ""
     ) {
       return;
     } else {
-      addTodo(createTodo);
-
-      if (toastTimeout) {
-        clearTimeout(toastTimeout);
+      if (taskLoading.createTodo) {
+        return; 
       }
 
-      const newTimeout = setTimeout(() => {
+      try {
+        useTodoStore.setState({
+          taskLoading: { ...taskLoading, createTodo: true },
+        });
+
+        await createTodo(newTodo);
+
         addToast(
           "Task Added successfully.",
           "success",
@@ -83,17 +77,13 @@ const CreateTodo: React.FC<{
           "green",
           "bg-green-100"
         );
-      }, 2000);
-
-      setToastTimeout(newTimeout);
-
-      setCreateTodo({
-        title: "",
-        date: "",
-        start_time: "",
-        stop_time: "",
-        updatedAt: "",
-      });
+      } catch (error) {
+        console.error("Error occurred during createTodo:", error);
+      } finally {
+        useTodoStore.setState({
+          taskLoading: { ...taskLoading, createTodo: false },
+        });
+      }
     }
   };
 
@@ -101,24 +91,25 @@ const CreateTodo: React.FC<{
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     const { value } = e.target;
-    editTodo.title = value;
+    singleTodo.title = value;
   };
 
   const handleEditTodoInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log(value);
-    (editTodo as any)[name] = value;
+    (singleTodo as any)[name] = value;
   };
 
-  const handleUpdateTodo = () => {
-    console.log(isLoading, "task");
-    updateTodo(editTodo);
-
-    if (toastTimeout) {
-      clearTimeout(toastTimeout);
+  const handleUpdateTodo = async () => {
+    if (taskLoading.updateTodo) {
+      return; 
     }
 
-    const newTimeout = setTimeout(() => {
+    try {
+      useTodoStore.setState({
+        taskLoading: { ...taskLoading, updateTodo: true },
+      });
+
+      await updateTodo(singleTodo);
       addToast(
         "Task Updated successfully.",
         "success",
@@ -126,20 +117,24 @@ const CreateTodo: React.FC<{
         "green",
         "bg-green-100"
       );
-    }, 2000);
-
-    setToastTimeout(newTimeout);
+    } catch (error) {
+      console.error("Error occurred during updateTodo:", error);
+    } finally {
+      useTodoStore.setState({
+        taskLoading: { ...taskLoading, updateTodo: false },
+      });
+    }
   };
 
   return (
     <div className="w-full shadow-md flex flex-col p-5 text-sm border-gray-100 border rounded-md">
       <div className="flex items-center justify-between pb-5">
         <h3 className="font-semibold">{header}</h3>
-        <button onClick={() => openModal(false)} className="text-xs">
+        <button onClick={() => setCreateTodo(false)} className="text-xs">
           <GrClose />
         </button>
       </div>
-      {editTodo && header === "Edit Task" ? (
+      {singleTodo && header === "Edit Task" ? (
         // Edit todo
         <form className="flex flex-col">
           <div className="flex flex-col gap-2">
@@ -150,7 +145,7 @@ const CreateTodo: React.FC<{
                 id="title"
                 cols={30}
                 rows={5}
-                defaultValue={editTodo.title}
+                defaultValue={singleTodo.title}
                 onChange={handleEditTodoTextArea}
               ></textarea>
             </div>
@@ -208,19 +203,23 @@ const CreateTodo: React.FC<{
           <div className="mt-8">
             <div className="grid grid-cols-2 gap-3 w-full">
               <Button
-                onClick={() => openModal(false)}
+                onClick={() => setCreateTodo(false)}
                 className="border rounded-md bg-white font-medium w-full"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleUpdateTodo}
-                className={`bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium w-full ${
-                  isLoading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                disabled={isLoading}
+                className={`bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium w-full `}
               >
-                <span> {isLoading && <Loading />}</span> Save
+                {taskLoading.updateTodo ? (
+                  <span className="inline-flex items-center">
+                    <Loading />
+                    Updating...
+                  </span>
+                ) : (
+                  "Save"
+                )}
               </Button>
             </div>
           </div>
@@ -239,7 +238,6 @@ const CreateTodo: React.FC<{
                 onChange={handleCreateTodoTextarea}
                 placeholder="Add task for today"
               ></textarea>
-              {/* {createTodo === "" ? <small>Please add a task</small> : ""} */}
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
               <div className="col-span-5 lg:col-span-1">
@@ -295,19 +293,23 @@ const CreateTodo: React.FC<{
           <div className="mt-8">
             <div className="grid grid-cols-2 gap-3 w-full">
               <Button
-                onClick={() => openModal(false)}
+                onClick={() => setCreateTodo(false)}
                 className="border rounded-md bg-white font-medium"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleAddTodo}
-                className={`bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium ${
-                  isLoading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                disabled={isLoading}
+                className={`bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium `}
               >
-                <span> {isLoading && <Loading />}</span> Add
+                {taskLoading.createTodo ? (
+                  <span className="inline-flex items-center">
+                    <Loading />
+                    Adding...
+                  </span>
+                ) : (
+                  "Add"
+                )}
               </Button>
             </div>
           </div>
