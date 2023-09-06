@@ -115,7 +115,7 @@ const Calendar = () => {
 
   return (
     <div>
-      <div className="mx-auto max-w-xs shadow-md p-3 rounded">
+      <div className="mx-auto max-w-xs lg:max-w-md shadow-md p-3 rounded">
         <div className="text-center w-full">
           <div className="bg-white">
             <div className="flex items-center text-gray-900 pb-3">
@@ -186,8 +186,8 @@ const Calendar = () => {
                   <time
                     dateTime={day.date}
                     className={[
-                      "mx-auto flex h-7 w-7 items-center justify-center rounded-full",
-                      day.isToday && "bg-gray-300 rounded-full",
+                      "mx-auto flex h-7 w-7 lg:h-10 items-center justify-center rounded-full",
+                      day.isToday && "bg-gray-300 rounded-full lg:p-5",
                     ].join(" ")}
                   >
                     {day.date?.split("-").pop()?.replace(/^0/, "") || ""}

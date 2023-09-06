@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@nextui-org/react";
 import { GrClose } from "react-icons/gr";
 import { LuCalendar } from "react-icons/lu";
@@ -11,6 +12,7 @@ import {
 } from "../../lib/utils/timeFormatter";
 import DatePicker from "../DatePicker";
 import TimePickerValue from "../TimePicker";
+import dayjs from "dayjs";
 
 const EditTodoBottomDrawer: React.FC<{
   handleHide: (state: boolean) => void;
@@ -36,6 +38,11 @@ const EditTodoBottomDrawer: React.FC<{
   editOrDelete,
 }) => {
   const { deleteTodo, taskLoading, singleTodo, updateTodo } = useTodoStore();
+  const [error, setError] = useState<{
+    less_date: string;
+  }>({
+    less_date: "",
+  });
 
   const handleDeleteTodo = async () => {
     if (taskLoading.deleteTodo) {
@@ -70,33 +77,55 @@ const EditTodoBottomDrawer: React.FC<{
   };
 
   const handleUpdateTodo = async () => {
-    // Check if "updateTodo" task is currently loading
-    if (taskLoading.updateTodo) {
-      return;
+    const newError: typeof error = { ...error };
+    const currentDateTime = dayjs();
+
+    const selectedDate = dayjs(singleTodo.date);
+
+    const selectedTime = dayjs(singleTodo.start_time).format("HH:mm");
+
+    // Combine date and time and parse it as a dayjs object
+    const selectedDateTime = dayjs(
+      `${selectedDate.format("YYYY-MM-DD")}T${selectedTime}:00.000Z`
+    ).subtract(1, "hour"); //subtract one to get accurate time for this zone
+
+    if (selectedDateTime.isBefore(currentDateTime)) {
+      newError.less_date = "Selected date and time must be in the future";
+    } else {
+      newError.less_date = "";
     }
 
-    try {
-      useTodoStore.setState({
-        taskLoading: { ...taskLoading, updateTodo: true },
-      });
+    setError(newError);
 
-      await updateTodo(singleTodo);
-      addToast(
-        "Task Updated successfully.",
-        "success",
-        "check-icon",
-        "green",
-        "bg-green-100"
-      );
-    } catch (error) {
-      console.error("Error occurred during updateTodo:", error);
-    } finally {
-      useTodoStore.setState({
-        taskLoading: { ...taskLoading, updateTodo: false },
-      });
+    if (newError.less_date !== "") {
+      return;
+    } else {
+      if (taskLoading.updateTodo) {
+        return;
+      }
 
-      handleEditOrDelete();
-      handleHide(false);
+      try {
+        useTodoStore.setState({
+          taskLoading: { ...taskLoading, updateTodo: true },
+        });
+
+        await updateTodo(singleTodo);
+        addToast(
+          "Task Updated successfully.",
+          "success",
+          "check-icon",
+          "green",
+          "bg-green-100"
+        );
+      } catch (error) {
+        console.error("Error occurred during updateTodo:", error);
+      } finally {
+        useTodoStore.setState({
+          taskLoading: { ...taskLoading, updateTodo: false },
+        });
+        handleEditOrDelete();
+        handleHide(false);
+      }
     }
   };
 
@@ -216,7 +245,10 @@ const EditTodoBottomDrawer: React.FC<{
                   rows={5}
                   defaultValue={singleTodo.title}
                   onChange={handleEditTodoTextArea}
-                ></textarea>
+                ></textarea>{" "}
+                {error.less_date && (
+                  <p className="text-red-500 text-[0.7em]">{error.less_date}</p>
+                )}
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div className="">

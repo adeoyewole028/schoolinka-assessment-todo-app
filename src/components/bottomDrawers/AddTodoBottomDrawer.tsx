@@ -36,11 +36,13 @@ const AddTodoBottomDrawer: React.FC<{
   const [error, setError] = useState<{
     title: string;
     date: string;
+    less_date: string;
     start_time: string;
     stop_time: string;
   }>({
     title: "",
     date: "",
+    less_date: "",
     start_time: "",
     stop_time: "",
   });
@@ -80,12 +82,12 @@ const AddTodoBottomDrawer: React.FC<{
   };
 
   const handleAddTodo = async () => {
-    const newError: typeof error = { ...error };
+    const newError: typeof error = { ...error }; // Create a new error object
 
     if (newTodo.title === "") {
       newError.title = "Title is required";
     } else {
-      newError.title = "";
+      newError.title = ""; // Reset the error message if valid
     }
 
     if (newTodo.date === "") {
@@ -106,31 +108,47 @@ const AddTodoBottomDrawer: React.FC<{
       newError.stop_time = "";
     }
 
+    // Check if the selected date is less than today's date and time
+    const currentDateTime = new Date().getTime();
+    const [hour, minute] = newTodo.start_time.split(":").map(Number);
+    // Create a new Date object
+    const date = new Date(newTodo.date); // Year, month (0-based), day
+    // Set the hours and minutes
+    date.setHours(hour);
+    date.setMinutes(minute);
+
+    const selectedDateTime = date.getTime();
+    if (selectedDateTime < currentDateTime) {
+      console.log("Selected datetime is lesser");
+      newError.less_date = "Selected date and time must be in the future";
+    } else {
+      newError.less_date = ""; // Reset the less_date error if date is valid
+    }
+
+    // Update the error state with the new error object
     setError(newError);
 
+    // Check if any field has an error
     if (
-      newTodo.title === "" ||
-      newTodo.date === "" ||
-      newTodo.start_time === "" ||
-      newTodo.stop_time === ""
+      newError.title !== "" ||
+      newError.date !== "" ||
+      newError.start_time !== "" ||
+      newError.stop_time !== "" ||
+      newError.less_date !== ""
     ) {
       return;
     } else {
-      // Check if "createTodo" task is currently loading
       if (taskLoading.createTodo) {
-        return; // Do nothing if the task is still loading
+        return;
       }
 
       try {
-        // Set the "taskLoading.createTodo" flag to true to indicate loading
         useTodoStore.setState({
           taskLoading: { ...taskLoading, createTodo: true },
         });
 
-        // Call the "createTodo" function
         await createTodo(newTodo);
 
-        // Show success toast
         addToast(
           "Task Added successfully.",
           "success",
@@ -139,21 +157,9 @@ const AddTodoBottomDrawer: React.FC<{
           "bg-green-100"
         );
       } catch (error) {
-        // Handle any errors here if necessary
         console.error("Error occurred during createTodo:", error);
       } finally {
-        // Reset the "newTodo" state
-        setNewTodo({
-          title: "",
-          date: "",
-          start_time: "",
-          stop_time: "",
-          updatedAt: "",
-        });
-
-        // close modal
         handleHide(false);
-        // Set the "taskLoading.createTodo" flag back to false
         useTodoStore.setState({
           taskLoading: { ...taskLoading, createTodo: false },
         });
@@ -211,6 +217,9 @@ const AddTodoBottomDrawer: React.FC<{
               ></textarea>
               {error.title && (
                 <p className="text-red-500 text-[0.7em]">{error.title}</p>
+              )}
+              {error.less_date && (
+                <p className="text-red-500 text-[0.7em]">{error.less_date}</p>
               )}
             </div>
             <div className="grid grid-cols-3 gap-3">

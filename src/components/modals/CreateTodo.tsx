@@ -1,11 +1,12 @@
 import useTodoStore from "../../store/useStore";
-import { useState } from "react";
+import {  useState } from "react";
 import { GrClose } from "react-icons/gr";
 import { BsBellFill } from "react-icons/bs";
 import { Button } from "@nextui-org/react";
 import Loading from "../Loading";
 import DatePicker from "../DatePicker";
 import TimePicker from "../TimePicker";
+import dayjs from "dayjs";
 
 const CreateTodo: React.FC<{
   header: string;
@@ -38,11 +39,13 @@ const CreateTodo: React.FC<{
   const [error, setError] = useState<{
     title: string;
     date: string;
+    less_date: string;
     start_time: string;
     stop_time: string;
   }>({
     title: "",
     date: "",
+    less_date: "",
     start_time: "",
     stop_time: "",
   });
@@ -56,7 +59,6 @@ const CreateTodo: React.FC<{
       [name]: value,
     });
   };
-
   const handleAddTodo = async () => {
     const newError: typeof error = { ...error }; // Create a new error object
 
@@ -84,6 +86,23 @@ const CreateTodo: React.FC<{
       newError.stop_time = "";
     }
 
+    // Check if the selected date is less than today's date and time
+    const currentDateTime = new Date().getTime();
+    const [hour, minute] = newTodo.start_time.split(":").map(Number);
+    // Create a new Date object
+    const date = new Date(newTodo.date); // Year, month (0-based), day
+    // Set the hours and minutes
+    date.setHours(hour);
+    date.setMinutes(minute);
+
+    const selectedDateTime = date.getTime();
+    if (selectedDateTime < currentDateTime) {
+      console.log("Selected datetime is lesser");
+      newError.less_date = "Selected date and time must be in the future";
+    } else {
+      newError.less_date = ""; // Reset the less_date error if date is valid
+    }
+
     // Update the error state with the new error object
     setError(newError);
 
@@ -92,7 +111,8 @@ const CreateTodo: React.FC<{
       newError.title !== "" ||
       newError.date !== "" ||
       newError.start_time !== "" ||
-      newError.stop_time !== ""
+      newError.stop_time !== "" ||
+      newError.less_date !== ""
     ) {
       return;
     } else {
@@ -120,6 +140,7 @@ const CreateTodo: React.FC<{
         useTodoStore.setState({
           taskLoading: { ...taskLoading, createTodo: false },
         });
+        setCreateTodo(false);
       }
     }
   };
@@ -166,30 +187,54 @@ const CreateTodo: React.FC<{
     singleTodo.stop_time = time.$d;
   };
 
+
   const handleUpdateTodo = async () => {
-    if (taskLoading.updateTodo) {
-      return;
+    const newError: typeof error = { ...error };
+    const currentDateTime = dayjs();
+    const selectedDate = dayjs(singleTodo.date);
+
+    const selectedTime = dayjs(singleTodo.start_time).format("HH:mm");
+
+    const selectedDateTime = dayjs(
+      `${selectedDate.format("YYYY-MM-DD")}T${selectedTime}:00.000Z`
+    ).subtract(1, "hour");
+
+
+    if (selectedDateTime.isBefore(currentDateTime)) {
+      newError.less_date = "Selected date and time must be in the future";
+    } else {
+      newError.less_date = "";
     }
 
-    try {
-      useTodoStore.setState({
-        taskLoading: { ...taskLoading, updateTodo: true },
-      });
+    setError(newError);
 
-      await updateTodo(singleTodo);
-      addToast(
-        "Task Updated successfully.",
-        "success",
-        "check-icon",
-        "green",
-        "bg-green-100"
-      );
-    } catch (error) {
-      console.error("Error occurred during updateTodo:", error);
-    } finally {
-      useTodoStore.setState({
-        taskLoading: { ...taskLoading, updateTodo: false },
-      });
+    if (newError.less_date !== "") {
+      return;
+    } else {
+      if (taskLoading.updateTodo) {
+        return;
+      }
+
+      try {
+        useTodoStore.setState({
+          taskLoading: { ...taskLoading, updateTodo: true },
+        });
+
+        await updateTodo(singleTodo);
+        addToast(
+          "Task Updated successfully.",
+          "success",
+          "check-icon",
+          "green",
+          "bg-green-100"
+        );
+      } catch (error) {
+        console.error("Error occurred during updateTodo:", error);
+      } finally {
+        useTodoStore.setState({
+          taskLoading: { ...taskLoading, updateTodo: false },
+        });
+      }
     }
   };
 
@@ -215,6 +260,9 @@ const CreateTodo: React.FC<{
                 defaultValue={singleTodo.title}
                 onChange={handleEditTodoTextArea}
               ></textarea>
+              {error.less_date && (
+                <p className="text-red-500 text-[0.7em]">{error.less_date}</p>
+              )}
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
               <div className="col-span-5 lg:col-span-1">
@@ -300,10 +348,12 @@ const CreateTodo: React.FC<{
                 onChange={handleCreateTodoTextarea}
                 placeholder="Add task for today"
               ></textarea>
-
               {/* display error message */}
               {error.title && (
                 <p className="text-red-500 text-[0.7em]">{error.title}</p>
+              )}
+              {error.less_date && (
+                <p className="text-red-500 text-[0.7em]">{error.less_date}</p>
               )}
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">

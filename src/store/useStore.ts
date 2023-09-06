@@ -169,8 +169,7 @@ const useTodoStore = create<TodoStore>()(
             const newTodo = get().appTodo.filter((todo) => todo.id !== id);
             set({ appTodo: newTodo });
 
-            const { currentPage, itemsPerPage, appTodo, getAppTodo } = get();
-            await getAppTodo();
+            const { currentPage, itemsPerPage, appTodo } = get();
             const indexOfLastItem = currentPage * itemsPerPage;
             const indexOfFirstItem = indexOfLastItem - itemsPerPage;
             const currentItems = appTodo.slice(
@@ -236,10 +235,30 @@ const useTodoStore = create<TodoStore>()(
             }));
           }
         },
+     
         getAppTodo: async () => {
           const res = await getTodos();
-          set({ appTodo: res });
+
+          if (res && res.length > 0) {
+            // Sort the res array by the start_time property in ascending order
+            res.sort((a, b) => {
+              const timeA = a.start_time.split(":").map(Number);
+              const timeB = b.start_time.split(":").map(Number);
+
+              if (timeA[0] !== timeB[0]) {
+                return timeA[0] - timeB[0];
+              }
+
+              return timeA[1] - timeB[1];
+            });
+
+            set({ appTodo: res });
+          } else {
+            // Handle the case where res is undefined or empty
+            set({ appTodo: [] }); // Set an empty array or handle it as needed
+          }
         },
+
         setCurrentPage: (page: number) => {
           set({ currentPage: page });
         },
@@ -249,20 +268,18 @@ const useTodoStore = create<TodoStore>()(
           await getAppTodo();
 
           // Sort the todo array by date in descending order (newest first)
-          const sortedTodo = get().appTodo.sort(
-            (a, b) =>
-              new Date(b.updatedAt!).getTime() -
-              new Date(a.updatedAt!).getTime()
-          );
-
+        //   const sortedTodo = get().appTodo.sort(
+        //     (a, b) => new Date(a.date!).getTime() - new Date(b.date!).getTime()
+        //   );
+        //   console.log(sortedTodo);
           const indexOfLastItem = currentPage * itemsPerPage;
           const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-          const currentItems = sortedTodo.slice(
+          const currentItems = get().appTodo.slice(
             indexOfFirstItem,
             indexOfLastItem
           );
 
-          const totalPage = Math.ceil(sortedTodo.length / itemsPerPage);
+          const totalPage = Math.ceil(get().appTodo.length / itemsPerPage);
 
           set({
             totalPages: totalPage,

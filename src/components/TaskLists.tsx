@@ -83,7 +83,7 @@ const TaskLists: React.FC<{
                 </div>
               </div>
               <div className="capitalize">
-                {formatDateRelativeToToday(item.updatedAt) ?? "Today"}
+                {formatDateRelativeToToday(item.date) ?? "Today"}
               </div>
             </div>
           ))}
