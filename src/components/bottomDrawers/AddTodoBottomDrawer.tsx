@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Button } from "@nextui-org/react";
 import { GrClose } from "react-icons/gr";
+import { BsBellFill } from "react-icons/bs";
 import useTodoStore from "../../store/useStore";
 import Loading from "../Loading";
 import DatePicker from "../DatePicker";
 import TimePicker from "../TimePicker";
 
-const BottomDrawer: React.FC<{
+const AddTodoBottomDrawer: React.FC<{
   handleHide: (state: boolean) => void;
   hide: boolean;
   addToast: (
@@ -193,12 +194,15 @@ const BottomDrawer: React.FC<{
                 </div>
               </div>
             </div>
-            <p className="flex items-center gap-1 justify-between mt-2">
-              <span className="text-gray-500">10 Minute before</span>
+            <div className="flex items-center gap-1 justify-between mt-2">
+              <p className="inline-flex items-center">
+                <BsBellFill className="text-xs mr-1" />
+                <span className="text-gray-500">10 Minute before</span>
+              </p>
               <span className="inline-flex text-[0.6em]">
                 <GrClose />
               </span>
-            </p>
+            </div>
           </div>
 
           <div className="mt-8">
@@ -230,4 +234,4 @@ const BottomDrawer: React.FC<{
   );
 };
 
-export default BottomDrawer;
+export default AddTodoBottomDrawer;

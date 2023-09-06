@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { Button } from "@nextui-org/react";
 import { GrClose } from "react-icons/gr";
 import { LuCalendar } from "react-icons/lu";
 import { BiTimeFive } from "react-icons/bi";
+import { BsBellFill } from "react-icons/bs";
 import useTodoStore from "../../store/useStore";
 import Loading from "../Loading";
 import {
@@ -12,9 +12,8 @@ import {
 import DatePicker from "../DatePicker";
 import TimePickerValue from "../TimePicker";
 
-const BottomDrawer: React.FC<{
+const EditTodoBottomDrawer: React.FC<{
   handleHide: (state: boolean) => void;
-  hide: boolean;
   addToast: (
     message: string,
     type: string,
@@ -22,22 +21,21 @@ const BottomDrawer: React.FC<{
     fill: string,
     background: string
   ) => void;
-}> = ({ handleHide, hide, addToast }) => {
-  const editTodo = useTodoStore((state) => state.singleTodo);
-
+  openEditTodo: () => void;
+  handleEditOrDelete: () => void;
+  isEditingTodo: boolean;
+  editOrDelete: boolean;
+  hide: boolean;
+}> = ({
+  handleHide,
+  hide,
+  addToast,
+  openEditTodo,
+  handleEditOrDelete,
+  isEditingTodo,
+  editOrDelete,
+}) => {
   const { deleteTodo, taskLoading, singleTodo, updateTodo } = useTodoStore();
-  const [isEditTodo, setIsEditTodo] = useState<boolean>(false);
-  const [editOrDelete, setEditOrDelete] = useState<boolean>(true);
-
-  const handleEditOrDelete = () => {
-    setIsEditTodo(false);
-    setEditOrDelete(true);
-  };
-
-  const openEditTodo = (state: boolean) => {
-    setIsEditTodo(state);
-    setEditOrDelete(false);
-  };
 
   const handleDeleteTodo = async () => {
     if (taskLoading.deleteTodo) {
@@ -68,7 +66,7 @@ const BottomDrawer: React.FC<{
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     const { value } = e.target;
-    editTodo.title = value;
+    singleTodo.title = value;
   };
 
   const handleUpdateTodo = async () => {
@@ -103,16 +101,16 @@ const BottomDrawer: React.FC<{
   };
 
   const handleUpdateTodoDate = (date: any) => {
-    editTodo.date = date;
+    singleTodo.date = date;
   };
 
   const handleUpdateStartTime = (time: any) => {
     // console.log(time.format("HH:mm")); // Get the selected time in HH:mm format
 
-    editTodo.start_time = time.$d;
+    singleTodo.start_time = time.$d;
   };
   const handleUpdateStopTime = (time: any) => {
-    editTodo.stop_time = time.$d;
+    singleTodo.stop_time = time.$d;
   };
 
   return (
@@ -193,7 +191,7 @@ const BottomDrawer: React.FC<{
                 </Button>
                 <Button
                   disabled={singleTodo?.completed}
-                  onClick={() => openEditTodo(true)}
+                  onClick={() => openEditTodo()}
                   className={`bg-[#3F5BF6] hover:bg-[#0E31F2] text-white border rounded-md font-medium ${
                     singleTodo?.completed ? "opacity-50 cursor-not-allowed" : ""
                   }`}
@@ -206,7 +204,7 @@ const BottomDrawer: React.FC<{
         )}
 
         {/* // Edit todo */}
-        {isEditTodo && (
+        {isEditingTodo && (
           <form className="flex flex-col ">
             <div className="flex flex-col gap-2">
               <div className="w-full">
@@ -216,7 +214,7 @@ const BottomDrawer: React.FC<{
                   id="title"
                   cols={30}
                   rows={5}
-                  defaultValue={editTodo.title}
+                  defaultValue={singleTodo.title}
                   onChange={handleEditTodoTextArea}
                 ></textarea>
               </div>
@@ -226,7 +224,7 @@ const BottomDrawer: React.FC<{
                     Date
                   </label>
                   <DatePicker
-                    value={editTodo.date}
+                    value={singleTodo.date}
                     handleDate={handleUpdateTodoDate}
                   />
                 </div>
@@ -237,7 +235,7 @@ const BottomDrawer: React.FC<{
                         Time
                       </label>
                       <TimePickerValue
-                        value={editTodo.start_time}
+                        value={singleTodo.start_time}
                         handleChange={handleUpdateStartTime}
                       />
                     </div>
@@ -246,19 +244,22 @@ const BottomDrawer: React.FC<{
                         Time
                       </label>
                       <TimePickerValue
-                        value={editTodo.stop_time}
+                        value={singleTodo.stop_time}
                         handleChange={handleUpdateStopTime}
                       />
                     </div>
                   </div>
                 </div>
               </div>
-              <p className="flex items-center gap-1 justify-between mt-2">
-                <span className="text-gray-500">10 Minute before</span>
+              <div className="flex items-center gap-1 justify-between mt-2">
+                <p className="inline-flex items-center">
+                  <BsBellFill className="text-xs mr-1" />
+                  <span className="text-gray-500">10 Minute before</span>
+                </p>
                 <span className="inline-flex text-[0.6em]">
                   <GrClose />
                 </span>
-              </p>
+              </div>
             </div>
 
             <div className="mt-8">
@@ -296,4 +297,4 @@ const BottomDrawer: React.FC<{
   );
 };
 
-export default BottomDrawer;
+export default EditTodoBottomDrawer;

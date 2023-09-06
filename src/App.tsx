@@ -10,18 +10,30 @@ import CreateTodo from "./components/modals/CreateTodo";
 import OptionsModal from "./components/modals/DeleteOrEditModal";
 import FullCalendar from "./components/FullCalender";
 import InputTask from "./components/InputTask";
-import AddTodoBottomDrawer from "./components/bottomDrawers/AddTodo";
-import EditTodoBottomDrawer from "./components/bottomDrawers/EditTodo";
+import AddTodoBottomDrawer from "./components/bottomDrawers/AddTodoBottomDrawer";
+import EditTodoBottomDrawer from "./components/bottomDrawers/EditTodoBottomDrawer";
 import Toast from "./components/toastsNotification/Toast";
 
 function App() {
   const { getPagination, isModal, isCreateTodo, isEditTodo } = useTodoStore();
 
-  const [isBottomDrawer, setBottomDrawer] = useState<boolean>(false);
+  const [isMobileAdd, setIsMobileAdd] = useState<boolean>(false);
   const [isMobileEdit, setIsMobileEdit] = useState<boolean>(false);
+  const [isEditingTodo, setIsEditingTodo] = useState<boolean>(false);
+  const [editOrDelete, setEditOrDelete] = useState<boolean>(true);
 
-  const handleBottomDrawer = (state: boolean, item?: {}) => {
-    setBottomDrawer(state);
+  const handleEditOrDelete = () => {
+    setIsEditingTodo(false);
+    setEditOrDelete(true);
+  };
+
+  const openEditTodo = () => {
+    setIsEditingTodo(true);
+    setEditOrDelete(false);
+  };
+
+  const handleAddOnMobile = (state: boolean, item?: {}) => {
+    setIsMobileAdd(state);
   };
 
   const handleEditOnMobile = (state: boolean, item?: {}) => {
@@ -71,11 +83,12 @@ function App() {
     <div className="mx-auto max-w-7xl pb-10">
       <div
         onClick={() => {
-          handleBottomDrawer(false);
+          handleAddOnMobile(false);
           setIsMobileEdit(false);
+          handleEditOrDelete();
         }}
         className={
-          isBottomDrawer || isMobileEdit
+          isMobileAdd || isMobileEdit
             ? "sm:hidden fixed backdrop top-0 bg-gray-900/30 w-full h-screen z-50 overflow-hidden"
             : ""
         }
@@ -87,10 +100,7 @@ function App() {
           <div className="col-span-2 w-full">
             <SingleCalender />
             <div className="pb-10">
-              <TaskLists
-                handleHide={handleEditOnMobile}
-                hide={isBottomDrawer}
-              />
+              <TaskLists handleHide={handleEditOnMobile} hide={isMobileAdd} />
             </div>
           </div>
           <div className="w-full hidden sm:block">
@@ -107,17 +117,21 @@ function App() {
         </div>
       </main>
       <footer className="sm:hidden  bg-white text-white fixed bottom-0 right-0 left-0 px-3 py-3">
-        <InputTask handleHide={handleBottomDrawer} />
+        <InputTask handleHide={handleAddOnMobile} />
       </footer>
       <AddTodoBottomDrawer
-        handleHide={handleBottomDrawer}
-        hide={isBottomDrawer}
+        handleHide={handleAddOnMobile}
+        hide={isMobileAdd}
         addToast={addToast}
       />
       <EditTodoBottomDrawer
         handleHide={handleEditOnMobile}
         hide={isMobileEdit}
         addToast={addToast}
+        isEditingTodo={isEditingTodo}
+        handleEditOrDelete={handleEditOrDelete}
+        editOrDelete={editOrDelete}
+        openEditTodo={openEditTodo}
       />
       <Toast toasts={toasts} onClose={removeToast} />
     </div>
