@@ -169,14 +169,14 @@ const BottomDrawer: React.FC<{
                 placeholder="Add task for today"
               ></textarea>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div className="">
                 <label htmlFor="date" className="sr-only">
                   Date
                 </label>
                 <DatePicker handleDate={handleCreateTodoDate} />
               </div>
-              <div className="">
+              <div className="col-span-2">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label htmlFor="start_time" className="sr-only">

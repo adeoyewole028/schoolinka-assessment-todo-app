@@ -220,7 +220,7 @@ const BottomDrawer: React.FC<{
                   onChange={handleEditTodoTextArea}
                 ></textarea>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div className="">
                   <label htmlFor="date" className="sr-only">
                     Date
@@ -230,7 +230,7 @@ const BottomDrawer: React.FC<{
                     handleDate={handleUpdateTodoDate}
                   />
                 </div>
-                <div className="">
+                <div className="col-span-2">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label htmlFor="start_time" className="sr-only">
