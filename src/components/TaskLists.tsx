@@ -58,7 +58,7 @@ const TaskLists: React.FC<{
             <div
               onClick={(e) => handleCompleteCheck(e, item)}
               key={item.id}
-              className={`flex justify-between border rounded shadow bg-gray-100/75 w-full p-2 items-center text-sm px-4 cursor-pointer`}
+              className={`flex justify-between border rounded shadow bg-gray-100/75 hover:bg-blue-100 w-full p-2 items-center text-sm px-4 cursor-pointer`}
             >
               <div
                 className={`flex gap-3 items-center ${
