@@ -33,6 +33,18 @@ const AddTodoBottomDrawer: React.FC<{
     updatedAt: "",
   });
 
+  const [error, setError] = useState<{
+    title: string;
+    date: string;
+    start_time: string;
+    stop_time: string;
+  }>({
+    title: "",
+    date: "",
+    start_time: "",
+    stop_time: "",
+  });
+
   const handleCreateTodoTextarea = (
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
@@ -68,6 +80,34 @@ const AddTodoBottomDrawer: React.FC<{
   };
 
   const handleAddTodo = async () => {
+    const newError: typeof error = { ...error };
+
+    if (newTodo.title === "") {
+      newError.title = "Title is required";
+    } else {
+      newError.title = "";
+    }
+
+    if (newTodo.date === "") {
+      newError.date = "Date is required";
+    } else {
+      newError.date = "";
+    }
+
+    if (newTodo.start_time === "") {
+      newError.start_time = "Start time is required";
+    } else {
+      newError.start_time = "";
+    }
+
+    if (newTodo.stop_time === "") {
+      newError.stop_time = "Stop time is required";
+    } else {
+      newError.stop_time = "";
+    }
+
+    setError(newError);
+
     if (
       newTodo.title === "" ||
       newTodo.date === "" ||
@@ -169,6 +209,9 @@ const AddTodoBottomDrawer: React.FC<{
                 onChange={handleCreateTodoTextarea}
                 placeholder="Add task for today"
               ></textarea>
+              {error.title && (
+                <p className="text-red-500 text-[0.7em]">{error.title}</p>
+              )}
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div className="">
@@ -176,6 +219,9 @@ const AddTodoBottomDrawer: React.FC<{
                   Date
                 </label>
                 <DatePicker handleDate={handleCreateTodoDate} />
+                {error.date && (
+                  <p className="text-red-500 text-[0.7em]">{error.date}</p>
+                )}
               </div>
               <div className="col-span-2">
                 <div className="grid grid-cols-2 gap-2">
@@ -184,12 +230,22 @@ const AddTodoBottomDrawer: React.FC<{
                       Start Time
                     </label>
                     <TimePicker handleChange={handleCreateStartTime} />
+                    {error.start_time && (
+                      <p className="text-red-500 text-[0.7em]">
+                        {error.start_time}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor="stop_time" className="sr-only">
                       Stop Time
                     </label>
                     <TimePicker handleChange={handleCreateStopTime} />
+                    {error.stop_time && (
+                      <p className="text-red-500 text-[0.7em]">
+                        {error.stop_time}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>

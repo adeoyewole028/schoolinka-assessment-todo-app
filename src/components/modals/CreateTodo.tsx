@@ -34,6 +34,19 @@ const CreateTodo: React.FC<{
     updatedAt: "",
   });
 
+  //   set error state
+  const [error, setError] = useState<{
+    title: string;
+    date: string;
+    start_time: string;
+    stop_time: string;
+  }>({
+    title: "",
+    date: "",
+    start_time: "",
+    stop_time: "",
+  });
+
   const handleCreateTodoTextarea = (
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
@@ -45,11 +58,41 @@ const CreateTodo: React.FC<{
   };
 
   const handleAddTodo = async () => {
+    const newError: typeof error = { ...error }; // Create a new error object
+
+    if (newTodo.title === "") {
+      newError.title = "Title is required";
+    } else {
+      newError.title = ""; // Reset the error message if valid
+    }
+
+    if (newTodo.date === "") {
+      newError.date = "Date is required";
+    } else {
+      newError.date = "";
+    }
+
+    if (newTodo.start_time === "") {
+      newError.start_time = "Start time is required";
+    } else {
+      newError.start_time = "";
+    }
+
+    if (newTodo.stop_time === "") {
+      newError.stop_time = "Stop time is required";
+    } else {
+      newError.stop_time = "";
+    }
+
+    // Update the error state with the new error object
+    setError(newError);
+
+    // Check if any field has an error
     if (
-      newTodo.title === "" ||
-      newTodo.date === "" ||
-      newTodo.start_time === "" ||
-      newTodo.stop_time === ""
+      newError.title !== "" ||
+      newError.date !== "" ||
+      newError.start_time !== "" ||
+      newError.stop_time !== ""
     ) {
       return;
     } else {
@@ -257,6 +300,11 @@ const CreateTodo: React.FC<{
                 onChange={handleCreateTodoTextarea}
                 placeholder="Add task for today"
               ></textarea>
+
+              {/* display error message */}
+              {error.title && (
+                <p className="text-red-500 text-[0.7em]">{error.title}</p>
+              )}
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
               <div className="col-span-5 lg:col-span-1">
@@ -264,6 +312,10 @@ const CreateTodo: React.FC<{
                   Date
                 </label>
                 <DatePicker handleDate={handleCreateTodoDate} />
+                {/* display error message */}
+                {error.date && (
+                  <p className="text-red-500 text-[0.7em]">{error.date}</p>
+                )}
               </div>
               <div className="-z-50"></div>
               <div className="col-span-5 lg:col-span-3">
@@ -273,12 +325,24 @@ const CreateTodo: React.FC<{
                       Time
                     </label>
                     <TimePicker handleChange={handleCreateStartTime} />
+                    {/*  display error message */}
+                    {error.start_time && (
+                      <p className="text-red-500 text-[0.7em]">
+                        {error.start_time}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor="time" className="sr-only">
                       Time
                     </label>
                     <TimePicker handleChange={handleCreateStopTime} />
+                    {/*  display error message */}
+                    {error.stop_time && (
+                      <p className="text-red-500 text-[0.7em]">
+                        {error.stop_time}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>

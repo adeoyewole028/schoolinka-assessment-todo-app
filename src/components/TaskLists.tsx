@@ -10,10 +10,7 @@ const TaskLists: React.FC<{
   handleHide: (state: boolean, item: {}) => void;
   hide: boolean;
 }> = ({ handleHide, hide }) => {
-  const todo = useTodoStore((state) => state.paginatedTodo);
-  const taskLoading = useTodoStore((state) => state.taskLoading);
-  const openModal = useTodoStore((state) => state.setIsModal);
-  const updateTodo = useTodoStore((state) => state.updateTodo);
+  const { paginatedTodo, taskLoading, setIsModal, updateTodo, appTodo } = useTodoStore();
 
   const handleCompleteCheck = (
     e: any,
@@ -31,7 +28,7 @@ const TaskLists: React.FC<{
       e.target.tagName.toLowerCase() !== "input" ||
       e.target.type !== "checkbox"
     ) {
-      openModal(true, item);
+      setIsModal(true, item);
       handleHide(true, item);
     } else {
       // Set loading state for the specific task
@@ -44,7 +41,7 @@ const TaskLists: React.FC<{
         id: item.id,
       };
       updateTodo(updatedTodo);
-      openModal(false, item);
+      setIsModal(false, item);
     }
   };
 
@@ -52,9 +49,9 @@ const TaskLists: React.FC<{
     <div>
       <h4 className="text-start mt-5 font-semibold">My Task</h4>
       <br />
-      {todo.length > 0 ? (
+      {appTodo.length > 0 ? (
         <div className="flex flex-col gap-5 w-full">
-          {todo.map((item) => (
+          {paginatedTodo.map((item) => (
             <div
               onClick={(e) => handleCompleteCheck(e, item)}
               key={item.id}

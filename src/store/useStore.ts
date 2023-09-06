@@ -169,7 +169,8 @@ const useTodoStore = create<TodoStore>()(
             const newTodo = get().appTodo.filter((todo) => todo.id !== id);
             set({ appTodo: newTodo });
 
-            const { currentPage, itemsPerPage, appTodo } = get();
+            const { currentPage, itemsPerPage, appTodo, getAppTodo } = get();
+            await getAppTodo();
             const indexOfLastItem = currentPage * itemsPerPage;
             const indexOfFirstItem = indexOfLastItem - itemsPerPage;
             const currentItems = appTodo.slice(
