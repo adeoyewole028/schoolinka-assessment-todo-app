@@ -135,7 +135,6 @@ const useTodoStore = create<TodoStore>()(
               todo.updatedAt
             );
 
-
             if (data) {
               set((state) => ({
                 ...state,
@@ -154,7 +153,6 @@ const useTodoStore = create<TodoStore>()(
             );
             set({ paginatedTodo: currentItems });
           } finally {
-            // Set loading state back to false when the task completes (whether it succeeds or fails)
             set((state) => ({
               taskLoading: { ...state.taskLoading, createTodo: false },
             }));
@@ -167,7 +165,7 @@ const useTodoStore = create<TodoStore>()(
               taskLoading: { ...state.taskLoading, [id]: true },
             }));
 
-             await deleteTodo(id);
+            await deleteTodo(id);
             const newTodo = get().appTodo.filter((todo) => todo.id !== id);
             set({ appTodo: newTodo });
 
@@ -197,13 +195,12 @@ const useTodoStore = create<TodoStore>()(
           stop_time: string;
           updatedAt: string;
         }) => {
-
           try {
             set((state) => ({
               taskLoading: { ...state.taskLoading, [todo.id!]: true },
             }));
 
-            const res = await updateTodo(
+            await updateTodo(
               todo.id,
               todo.title,
               todo.completed,
@@ -212,7 +209,6 @@ const useTodoStore = create<TodoStore>()(
               todo.stop_time,
               todo.updatedAt
             );
-            console.table(res);
             const newTodo = get().paginatedTodo.map((todos) => {
               if (todos.id === todo.id) {
                 return {
