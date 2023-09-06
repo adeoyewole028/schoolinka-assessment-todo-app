@@ -174,14 +174,14 @@ const BottomDrawer: React.FC<{
                   <LuCalendar />
                 </span>
                 <span className="capitalize">
-                  {formatDateRelativeToToday(singleTodo.date)}{" "}
+                  {formatDateRelativeToToday(singleTodo?.date)}{" "}
                 </span>
               </p>
               <p className="flex items-center gap-1">
                 <span className="inline-flex text-[#3F5BF6]">
                   <BiTimeFive />
                 </span>
-                {formatTimeRange(singleTodo.start_time, singleTodo.stop_time)}
+                {formatTimeRange(singleTodo?.start_time, singleTodo?.stop_time)}
               </p>
             </div>
 
