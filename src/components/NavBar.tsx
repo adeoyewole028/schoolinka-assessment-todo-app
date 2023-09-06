@@ -18,6 +18,17 @@ export default function Nav() {
   };
   return (
     <>
+      {" "}
+      <div
+        onClick={() => {
+          setIsDrawerOpen(false);
+        }}
+        className={
+          isDrawerOpen
+            ? "sm:hidden fixed backdrop top-0 bg-gray-900/30 w-full h-screen z-40 overflow-y-hidden"
+            : ""
+        }
+      ></div>
       <nav className="fixed w-full top-0 left-0 right-0 z-40 bg-white border-gray-200 dark:bg-gray-900 shadow-md">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <div className="flex items-center gap-2">
