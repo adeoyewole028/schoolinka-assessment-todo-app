@@ -18,8 +18,8 @@ export function formatTimeRange(start_time: string, stop_time: string) {
   const stopTime = new Date(stop_time);
 
   // Subtract one hour from the times
-  startTime.setHours(startTime.getHours() - 1);
-  stopTime.setHours(stopTime.getHours() - 1);
+  startTime.setHours(startTime.getHours());
+  stopTime.setHours(stopTime.getHours());
 
   // Set the timezone to Africa/Lagos for Nigeria
   const timeZone = "Africa/Lagos";
@@ -36,7 +36,6 @@ export function formatTimeRange(start_time: string, stop_time: string) {
 
   return `${formattedStartTime} - ${formattedStopTime}`;
 }
-
 
 export function convertToAMPM(time: string) {
   //Example - 02:30 PM

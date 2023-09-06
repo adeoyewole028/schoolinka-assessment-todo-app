@@ -1,8 +1,10 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@nextui-org/react";
 import { GrClose } from "react-icons/gr";
 import useTodoStore from "../../store/useStore";
 import Loading from "../Loading";
+import DatePicker from "../DatePicker";
+import TimePicker from "../TimePicker";
 
 const BottomDrawer: React.FC<{
   handleHide: (state: boolean) => void;
@@ -40,11 +42,27 @@ const BottomDrawer: React.FC<{
     });
   };
 
-  const handleCreateTodoInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const handleCreateTodoDate = (date: any) => {
+    console.log(date.$d);
     setNewTodo({
       ...newTodo,
-      [name]: value,
+      date,
+    });
+  };
+
+  const handleCreateStartTime = (time: any) => {
+    console.log(time.format("HH:mm")); // Get the selected time in HH:mm format
+    setNewTodo({
+      ...newTodo,
+      start_time: time.format("HH:mm"),
+    });
+  };
+
+  const handleCreateStopTime = (time: any) => {
+    console.log(time.format("HH:mm")); // Get the selected time in HH:mm format
+    setNewTodo({
+      ...newTodo,
+      stop_time: time.format("HH:mm"),
     });
   };
 
@@ -105,10 +123,10 @@ const BottomDrawer: React.FC<{
   return (
     <div>
       <div
-        className={`fixed left-0 right-0 z-50 w-full h-96 p-4 overflow-y-auto transition-transform bg-white rounded-t-3xl ${
+        className={`fixed left-0 right-0 z-50 w-full h-[400px] p-4 overflow-y-auto transition-transform bg-white rounded-t-3xl ${
           hide
-            ? "-translate-y-96 -bottom-96 transition delay-150 ease-in-out"
-            : "-bottom-96"
+            ? "-translate-y-[400px] -bottom-[400px] transition delay-150 ease-in-out"
+            : "-bottom-[400px]"
         }`}
       >
         <h5 className="inline-flex items-center mb-4 text-base font-semibold text-gray-500 dark:text-gray-400">
@@ -147,7 +165,7 @@ const BottomDrawer: React.FC<{
         </button>
 
         {/* // Create todo */}
-        <form className="flex flex-col ">
+        <form className="flex flex-col">
           <div className="flex flex-col gap-2">
             <div className="w-full">
               <textarea
@@ -165,39 +183,21 @@ const BottomDrawer: React.FC<{
                 <label htmlFor="date" className="sr-only">
                   Date
                 </label>
-                <input
-                  className="border ring-1 ring-gray-300 w-full lg:w-[7em] rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
-                  type="date"
-                  name="date"
-                  id="date"
-                  onChange={handleCreateTodoInput}
-                />
+                <DatePicker handleDate={handleCreateTodoDate} />
               </div>
               <div className="">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label htmlFor="time" className="sr-only">
-                      Time
+                    <label htmlFor="start_time" className="sr-only">
+                      Start Time
                     </label>
-                    <input
-                      className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
-                      type="time"
-                      name="start_time"
-                      id="time"
-                      onChange={handleCreateTodoInput}
-                    />
+                    <TimePicker handleChange={handleCreateStartTime} />
                   </div>
                   <div>
-                    <label htmlFor="time" className="sr-only">
-                      Time
+                    <label htmlFor="stop_time" className="sr-only">
+                      Stop Time
                     </label>
-                    <input
-                      className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
-                      type="time"
-                      name="stop_time"
-                      id="time"
-                      onChange={handleCreateTodoInput}
-                    />
+                    <TimePicker handleChange={handleCreateStopTime} />
                   </div>
                 </div>
               </div>

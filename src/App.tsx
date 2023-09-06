@@ -87,7 +87,10 @@ function App() {
           <div className="col-span-2 w-full">
             <SingleCalender />
             <div className="pb-10">
-              <TaskLists handleHide={handleEditOnMobile} hide={isBottomDrawer} />
+              <TaskLists
+                handleHide={handleEditOnMobile}
+                hide={isBottomDrawer}
+              />
             </div>
           </div>
           <div className="w-full hidden sm:block">

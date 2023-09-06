@@ -9,6 +9,8 @@ import {
   formatTimeRange,
   formatDateRelativeToToday,
 } from "../../lib/utils/timeFormatter";
+import DatePicker from "../DatePicker";
+import TimePickerValue from "../TimePicker";
 
 const BottomDrawer: React.FC<{
   handleHide: (state: boolean) => void;
@@ -69,12 +71,6 @@ const BottomDrawer: React.FC<{
     editTodo.title = value;
   };
 
-  const handleEditTodoInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-
-    (editTodo as any)[name] = value;
-  };
-
   const handleUpdateTodo = async () => {
     // Check if "updateTodo" task is currently loading
     if (taskLoading.updateTodo) {
@@ -104,6 +100,19 @@ const BottomDrawer: React.FC<{
       handleEditOrDelete();
       handleHide(false);
     }
+  };
+
+  const handleUpdateTodoDate = (date: any) => {
+    editTodo.date = date;
+  };
+
+  const handleUpdateStartTime = (time: any) => {
+    // console.log(time.format("HH:mm")); // Get the selected time in HH:mm format
+
+    editTodo.start_time = time.$d;
+  };
+  const handleUpdateStopTime = (time: any) => {
+    editTodo.stop_time = time.$d;
   };
 
   return (
@@ -172,7 +181,7 @@ const BottomDrawer: React.FC<{
                 <span className="inline-flex text-[#3F5BF6]">
                   <BiTimeFive />
                 </span>
-            {formatTimeRange(singleTodo.start_time, singleTodo.stop_time)}
+                {formatTimeRange(singleTodo.start_time, singleTodo.stop_time)}
               </p>
             </div>
 
@@ -225,38 +234,29 @@ const BottomDrawer: React.FC<{
                   <label htmlFor="date" className="sr-only">
                     Date
                   </label>
-                  <input
-                    className="border ring-1 ring-gray-300 w-full lg:w-[7em] rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
-                    type="date"
-                    name="date"
-                    id="date"
-                    onChange={handleEditTodoInput}
+                  <DatePicker
+                    value={editTodo.date}
+                    handleDate={handleUpdateTodoDate}
                   />
                 </div>
                 <div className="">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label htmlFor="time" className="sr-only">
+                      <label htmlFor="start_time" className="sr-only">
                         Time
                       </label>
-                      <input
-                        className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
-                        type="time"
-                        name="start_time"
-                        id="time"
-                        onChange={handleEditTodoInput}
+                      <TimePickerValue
+                        value={editTodo.start_time}
+                        handleChange={handleUpdateStartTime}
                       />
                     </div>
                     <div>
-                      <label htmlFor="time" className="sr-only">
+                      <label htmlFor="stop_time" className="sr-only">
                         Time
                       </label>
-                      <input
-                        className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
-                        type="time"
-                        name="stop_time"
-                        id="time"
-                        onChange={handleEditTodoInput}
+                      <TimePickerValue
+                        value={editTodo.stop_time}
+                        handleChange={handleUpdateStopTime}
                       />
                     </div>
                   </div>

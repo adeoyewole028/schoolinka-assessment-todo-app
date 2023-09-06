@@ -4,7 +4,6 @@ import Pagination from "../components/Pagination";
 import Loading from "./Loading";
 import {
   formatTimeRange,
-  convertToAMPM,
   formatDateRelativeToToday,
 } from "../lib/utils/timeFormatter";
 const TaskLists: React.FC<{
@@ -80,25 +79,9 @@ const TaskLists: React.FC<{
                 <div className="flex flex-col">
                   <label className="capitalize">{item.title}</label>
                   <span>
-                    {(() => {
-                      const start_time = item.start_time;
-                      const stop_time = item.stop_time;
-
-                      // Check if start_time or stop_time contains the '+' character
-                      if (
-                        !start_time.includes("+") ||
-                        !stop_time.includes("+")
-                      ) {
-                        // If the '+' character is not present, render your custom time range
-                        return `${convertToAMPM(start_time)} - ${convertToAMPM(
-                          stop_time
-                        )}`;
-                      } else {
-                        // If the '+' character is present, handle the special case
-
-                        return formatTimeRange(start_time, stop_time);
-                      }
-                    })()}
+                    <span>
+                      {formatTimeRange(item.start_time, item.stop_time)}
+                    </span>
                   </span>
                 </div>
               </div>

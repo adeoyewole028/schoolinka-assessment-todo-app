@@ -3,6 +3,8 @@ import { useState } from "react";
 import { GrClose } from "react-icons/gr";
 import { Button } from "@nextui-org/react";
 import Loading from "../Loading";
+import DatePicker from "../DatePicker";
+import TimePicker from "../TimePicker";
 
 const CreateTodo: React.FC<{
   header: string;
@@ -14,7 +16,6 @@ const CreateTodo: React.FC<{
     background: string
   ) => void;
 }> = ({ header, addToast }) => {
-
   const { setCreateTodo, createTodo, taskLoading, singleTodo, updateTodo } =
     useTodoStore();
 
@@ -42,14 +43,6 @@ const CreateTodo: React.FC<{
     });
   };
 
-  const handleCreateTodoInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setNewTodo({
-      ...newTodo,
-      [name]: value,
-    });
-  };
-
   const handleAddTodo = async () => {
     if (
       newTodo.title === "" ||
@@ -60,7 +53,7 @@ const CreateTodo: React.FC<{
       return;
     } else {
       if (taskLoading.createTodo) {
-        return; 
+        return;
       }
 
       try {
@@ -94,14 +87,44 @@ const CreateTodo: React.FC<{
     singleTodo.title = value;
   };
 
-  const handleEditTodoInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    (singleTodo as any)[name] = value;
+  const handleCreateTodoDate = (date: any) => {
+    setNewTodo({
+      ...newTodo,
+      date,
+    });
+  };
+
+  const handleCreateStartTime = (time: any) => {
+    console.log(time.format("HH:mm")); // Get the selected time in HH:mm format
+    setNewTodo({
+      ...newTodo,
+      start_time: time.format("HH:mm"),
+    });
+  };
+
+  const handleCreateStopTime = (time: any) => {
+    console.log(time.format("HH:mm")); // Get the selected time in HH:mm format
+    setNewTodo({
+      ...newTodo,
+      stop_time: time.format("HH:mm"),
+    });
+  };
+
+  const handleUpdateTodoDate = (date: any) => {
+    singleTodo.date = date;
+  };
+
+  const handleUpdateStartTime = (time: any) => {
+    console.log(time.$d);
+    singleTodo.start_time = time.$d;
+  };
+  const handleUpdateStopTime = (time: any) => {
+    singleTodo.stop_time = time.$d;
   };
 
   const handleUpdateTodo = async () => {
     if (taskLoading.updateTodo) {
-      return; 
+      return;
     }
 
     try {
@@ -154,39 +177,30 @@ const CreateTodo: React.FC<{
                 <label htmlFor="date" className="sr-only">
                   Date
                 </label>
-                <input
-                  className="border ring-1 ring-gray-300 w-full lg:w-[7em] rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
-                  type="date"
-                  name="date"
-                  id="date"
-                  onChange={handleEditTodoInput}
+                <DatePicker
+                  value={singleTodo.date}
+                  handleDate={handleUpdateTodoDate}
                 />
               </div>
               <div className="-z-50"></div>
               <div className="col-span-5 lg:col-span-3">
                 <div className="grid grid-cols-2 gap-2">
                   <div className="">
-                    <label htmlFor="time" className="sr-only">
+                    <label htmlFor="start_time" className="sr-only">
                       Time
                     </label>
-                    <input
-                      className="border ring-1 ring-gray-300 rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 w-full text-sm"
-                      type="time"
-                      name="start_time"
-                      id="time"
-                      onChange={handleEditTodoInput}
+                    <TimePicker
+                      value={singleTodo.start_time}
+                      handleChange={handleUpdateStartTime}
                     />
                   </div>
                   <div className="">
-                    <label htmlFor="time" className="sr-only">
+                    <label htmlFor="stop_time" className="sr-only">
                       Time
                     </label>
-                    <input
-                      className="border ring-1 ring-gray-300 rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 w-full text-sm"
-                      type="time"
-                      name="stop_time"
-                      id="time"
-                      onChange={handleEditTodoInput}
+                    <TimePicker
+                      value={singleTodo.stop_time}
+                      handleChange={handleUpdateStopTime}
                     />
                   </div>
                 </div>
@@ -244,13 +258,7 @@ const CreateTodo: React.FC<{
                 <label htmlFor="date" className="sr-only">
                   Date
                 </label>
-                <input
-                  className="border ring-1 ring-gray-300 w-full lg:w-[7em] rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
-                  type="date"
-                  name="date"
-                  id="date"
-                  onChange={handleCreateTodoInput}
-                />
+                <DatePicker handleDate={handleCreateTodoDate} />
               </div>
               <div className="-z-50"></div>
               <div className="col-span-5 lg:col-span-3">
@@ -259,25 +267,13 @@ const CreateTodo: React.FC<{
                     <label htmlFor="time" className="sr-only">
                       Time
                     </label>
-                    <input
-                      className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
-                      type="time"
-                      name="start_time"
-                      id="time"
-                      onChange={handleCreateTodoInput}
-                    />
+                    <TimePicker handleChange={handleCreateStartTime} />
                   </div>
                   <div>
                     <label htmlFor="time" className="sr-only">
                       Time
                     </label>
-                    <input
-                      className="border ring-1 ring-gray-300 w-full rounded-md focus:ring-0 focus:outline-none p-1 focus:border-sky-500 bg-gray-50 text-sm"
-                      type="time"
-                      name="stop_time"
-                      id="time"
-                      onChange={handleCreateTodoInput}
-                    />
+                    <TimePicker handleChange={handleCreateStopTime} />
                   </div>
                 </div>
               </div>
