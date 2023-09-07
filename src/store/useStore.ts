@@ -235,24 +235,24 @@ const useTodoStore = create<TodoStore>()(
             }));
           }
         },
-     
+
         getAppTodo: async () => {
           const res = await getTodos();
 
           if (res && res.length > 0) {
             // Sort the res array by the start_time property in ascending order
             res.sort((a, b) => {
-              const timeA = a.start_time.split(":").map(Number);
-              const timeB = b.start_time.split(":").map(Number);
+              const timeA = new Date(a.start_time).getTime();
+              const timeB = new Date(b.start_time).getTime();
 
-              if (timeA[0] !== timeB[0]) {
-                return timeA[0] - timeB[0];
+              if (timeA !== timeB) {
+                return timeA - timeB;
               }
 
-              return timeA[1] - timeB[1];
+              return timeA - timeB;
             });
 
-            set({ appTodo: res });
+            set({ appTodo: res.reverse() });
           } else {
             // Handle the case where res is undefined or empty
             set({ appTodo: [] }); // Set an empty array or handle it as needed
@@ -268,10 +268,10 @@ const useTodoStore = create<TodoStore>()(
           await getAppTodo();
 
           // Sort the todo array by date in descending order (newest first)
-        //   const sortedTodo = get().appTodo.sort(
-        //     (a, b) => new Date(a.date!).getTime() - new Date(b.date!).getTime()
-        //   );
-        //   console.log(sortedTodo);
+          //   const sortedTodo = get().appTodo.sort(
+          //     (a, b) => new Date(a.date!).getTime() - new Date(b.date!).getTime()
+          //   );
+          //   console.log(sortedTodo);
           const indexOfLastItem = currentPage * itemsPerPage;
           const indexOfFirstItem = indexOfLastItem - itemsPerPage;
           const currentItems = get().appTodo.slice(
